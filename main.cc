@@ -30,8 +30,26 @@ void get_time() {
 void config() {
     // Configure hardware
     system(clearCom);
-    std::cout << "Config" << std::endl;
-    // Write config to a file
+    // Cpu
+    long num_cpus = sysconf(_SC_NPROCESSORS_ONLN);
+    // Memory
+    long pages = sysconf(_SC_PHYS_PAGES);
+    long page_size = sysconf(_SC_PAGE_SIZE);
+    int memorySize = pages*page_size/pow(1024,2);
+    std::string ifCorrect;
+    int configureMemory;
+    std::cout << "Detected memory size: " << memorySize << std::endl;
+    std::cout << "This could be a little less than your actual ram" << std::endl;
+    std::cout << "Is this number correct? (y/n)" << std::endl;
+    std::cin >> ifCorrect;
+    if (ifCorrect == "y") {
+        std::cout << "Saving memory config" << std::endl;
+        // Save to file
+    } else {
+        std::cout << "Enter memory size: ";
+        std::cin >> configureMemory;
+        std::cout << "Saving memory config" << std::endl;
+    }
 }
 
 void hardwareInfo() {
@@ -40,6 +58,7 @@ void hardwareInfo() {
     long num_cpus = sysconf( _SC_NPROCESSORS_ONLN );
     long pages = sysconf(_SC_PHYS_PAGES);
     long page_size = sysconf(_SC_PAGE_SIZE);
+    int memorySize = pages*page_size/pow(1024,2);
     std::cout << "Hardware info" << std::endl;
     get_time();
     // CPU
@@ -49,7 +68,7 @@ void hardwareInfo() {
     // Memory
     std::cout << "Memory:" << std::endl;
     std::cout << "[DEBUG] " << pages << " pages " << page_size << " page_size" << std::endl;
-    std::cout << "Memory size: " << static_cast<int>(pages*page_size/pow(1024, 2)) << "MB" << std::endl;
+    std::cout << "Memory size: " << memorySize << "MB" << std::endl;
     // Drives
     std::cout << "Drives:" << std::endl;
 }

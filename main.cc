@@ -37,19 +37,30 @@ void config() {
     long page_size = sysconf(_SC_PAGE_SIZE);
     int memorySize = pages*page_size/pow(1024,2);
     std::string ifCorrect;
-    int configureMemory;
+    //Cpu
+    std::cout << "Detected CPU cores: " << num_cpus << std::endl;
+    std::cout << "Is this number correct? (y/n)" << std::endl;
+    std::cin >> ifCorrect;
+    if (ifCorrect == "y") {
+        std::cout << "Saving CPU config";
+    } else if (ifCorrect == "n") {
+        std::cout << "CPU configuration will not be saved at the moment" << std::endl;
+    } else {
+        std::cout << "Invalid argument" << std::endl;
+    }
+    blankline();
+    //Memory
     std::cout << "Detected memory size: " << memorySize << std::endl;
-    std::cout << "This could be a little less than your actual ram" << std::endl;
+    std::cout << "This could be a little less than your actual memory size" << std::endl;
     std::cout << "Is this number correct? (y/n)" << std::endl;
     std::cin >> ifCorrect;
     if (ifCorrect == "y") {
         std::cout << "Saving memory config" << std::endl;
-        // Save to file
-    } else {
-        std::cout << "Enter memory size: ";
-        std::cin >> configureMemory;
-        std::cout << "Saving memory config" << std::endl;
+        // Save to settings file
+    } else if (ifCorrect=="n") {
+        std::cout << "Memory configuration will not be saved at the moment" << std::endl;
     }
+    blankline();
 }
 
 void hardwareInfo() {
@@ -67,10 +78,11 @@ void hardwareInfo() {
     std::cout << "Number of cores: " << num_cpus << std::endl;
     // Memory
     std::cout << "Memory:" << std::endl;
-    std::cout << "[DEBUG] " << pages << " pages " << page_size << " page_size" << std::endl;
+    //std::cout << "[DEBUG] " << pages << " pages " << page_size << " page_size" << std::endl;
     std::cout << "Memory size: " << memorySize << "MB" << std::endl;
     // Drives
     std::cout << "Drives:" << std::endl;
+    blankline();
 }
 
 void mainDisp() {
@@ -79,6 +91,7 @@ void mainDisp() {
     std::cout << "Main display" << std::endl;
     get_time();
     // show status
+    blankline();
 }
 
 int main(int argc, char const *argv[]) {
@@ -112,18 +125,14 @@ int main(int argc, char const *argv[]) {
         switch (command) {
             case 0:
                 config();
-                blankline();
                 break;
             case 1:
                 hardwareInfo();
-                blankline();
                 break;
             case 2:
                 mainDisp();
-                blankline();
                 break;
             case 99:
-                blankline();
                 std::cout << "Exit" << std::endl;
                 return 0;
                 break;

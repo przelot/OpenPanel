@@ -4,6 +4,8 @@
 #include <cpuid.h>
 #include <chrono>
 #include <ctime>
+#include <filesystem>
+#include <fstream>
 
 // Define command to clear terminal
 #ifdef __linux__
@@ -17,7 +19,7 @@
 
 void blankline() {
     // Leave an empty line
-    std::cout << std::endl;
+    std::cout << "\n";
 }
 
 void get_time() {
@@ -25,6 +27,10 @@ void get_time() {
     auto time = std::chrono::system_clock::now();
     std::time_t time_now = std::chrono::system_clock::to_time_t(time);
     std::cout << "Current time: " << std::ctime(&time_now);
+}
+
+bool ifFileExists(const std::string& filename) {
+    return std::filesystem::exists(filename);
 }
 
 void config() {
@@ -36,8 +42,15 @@ void config() {
     long pages = sysconf(_SC_PHYS_PAGES);
     long page_size = sysconf(_SC_PAGE_SIZE);
     int memorySize = pages*page_size/pow(1024,2);
+    std::string filename = "config.config";
     std::string ifCorrect;
-    //Cpu
+    // Create config
+    if (!ifFileExists(filename)) {
+        std::cout << "Creating configuration file" << std::endl;
+        std::ofstream outfile ("config.config");
+        outfile.close();
+    }
+    // Cpu
     std::cout << "Detected CPU cores: " << num_cpus << std::endl;
     std::cout << "Is this number correct? (y/n)" << std::endl;
     std::cin >> ifCorrect;
@@ -45,6 +58,7 @@ void config() {
         std::cout << "Saving CPU config";
     } else if (ifCorrect == "n") {
         std::cout << "CPU configuration will not be saved at the moment" << std::endl;
+        // Save to settings file
     } else {
         std::cout << "Invalid argument" << std::endl;
     }
@@ -74,7 +88,6 @@ void hardwareInfo() {
     get_time();
     // CPU
     std::cout << "CPU:" << std::endl;
-    
     std::cout << "Number of cores: " << num_cpus << std::endl;
     // Memory
     std::cout << "Memory:" << std::endl;
@@ -82,6 +95,17 @@ void hardwareInfo() {
     std::cout << "Memory size: " << memorySize << "MB" << std::endl;
     // Drives
     std::cout << "Drives:" << std::endl;
+    blankline();
+}
+
+void selftest() {
+    // Selftest
+    std::string filename = "config.conf";
+    std::cout << "Selftest" << std::endl;
+    //Check if config exists
+    if (!ifFileExists(filename)) {
+        std::cout << "No configuration file" << std::endl;
+    }
     blankline();
 }
 
@@ -101,8 +125,7 @@ int main(int argc, char const *argv[]) {
     std::cout << "Welcome to the Panel" << std::endl;
     blankline();
     //selftest, read config from a file and compare it to hardwareInfo()
-    std::cout << "Selftest" << std::endl;
-    blankline();
+    selftest();
     do {
         std::cout << "Press enter to continue..." << std::endl;
     } while (std::cin.get() != '\n');

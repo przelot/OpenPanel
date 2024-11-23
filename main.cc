@@ -42,36 +42,37 @@ void config() {
     long pages = sysconf(_SC_PHYS_PAGES);
     long page_size = sysconf(_SC_PAGE_SIZE);
     int memorySize = pages*page_size/pow(1024,2);
-    std::string filename = "config.config";
-    std::string ifCorrect;
-    // Create config
-    if (!ifFileExists(filename)) {
+    std::string choice;
+    // Create config file
+    if (!ifFileExists("config.conf")) {
         std::cout << "Creating configuration file" << std::endl;
-        std::ofstream outfile ("config.config");
-        outfile.close();
+        std::ofstream config ("config.conf");
+        config.close();
     }
     // Cpu
+    std::cout << "CPU:" << std::endl;
     std::cout << "Detected CPU cores: " << num_cpus << std::endl;
-    std::cout << "Is this number correct? (y/n)" << std::endl;
-    std::cin >> ifCorrect;
-    if (ifCorrect == "y") {
+    std::cout << "Is this number correct? (y/n):" << std::endl;
+    std::cin >> choice;
+    if (choice == "y") {
         std::cout << "Saving CPU config";
-    } else if (ifCorrect == "n") {
+        // Save to config
+    } else if (choice == "n") {
         std::cout << "CPU configuration will not be saved at the moment" << std::endl;
-        // Save to settings file
     } else {
         std::cout << "Invalid argument" << std::endl;
     }
     blankline();
     //Memory
+    std::cout << "Memory:" << std::endl;
     std::cout << "Detected memory size: " << memorySize << std::endl;
-    std::cout << "This could be a little less than your actual memory size" << std::endl;
-    std::cout << "Is this number correct? (y/n)" << std::endl;
-    std::cin >> ifCorrect;
-    if (ifCorrect == "y") {
+    std::cout << "This might be a little less than your actual memory size" << std::endl;
+    std::cout << "Is this number correct? (y/n):" << std::endl;
+    std::cin >> choice;
+    if (choice == "y") {
         std::cout << "Saving memory config" << std::endl;
-        // Save to settings file
-    } else if (ifCorrect=="n") {
+        // Save to config
+    } else if (choice == "n") {
         std::cout << "Memory configuration will not be saved at the moment" << std::endl;
     }
     blankline();
@@ -89,10 +90,12 @@ void hardwareInfo() {
     // CPU
     std::cout << "CPU:" << std::endl;
     std::cout << "Number of cores: " << num_cpus << std::endl;
+    blankline();
     // Memory
     std::cout << "Memory:" << std::endl;
     //std::cout << "[DEBUG] " << pages << " pages " << page_size << " page_size" << std::endl;
     std::cout << "Memory size: " << memorySize << "MB" << std::endl;
+    blankline();
     // Drives
     std::cout << "Drives:" << std::endl;
     blankline();
@@ -100,11 +103,12 @@ void hardwareInfo() {
 
 void selftest() {
     // Selftest
-    std::string filename = "config.conf";
     std::cout << "Selftest" << std::endl;
     //Check if config exists
-    if (!ifFileExists(filename)) {
+    if (!ifFileExists("config.conf")) {
         std::cout << "No configuration file" << std::endl;
+    } else if (ifFileExists("config.conf")) {
+        std::cout << "Configuration file detected" << std::endl;
     }
     blankline();
 }

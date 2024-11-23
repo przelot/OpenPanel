@@ -43,25 +43,27 @@ void config() {
     long page_size = sysconf(_SC_PAGE_SIZE);
     int memorySize = pages*page_size/pow(1024,2);
     std::string choice;
-    // Create config file
+    // Create/open config file
     if (!ifFileExists("config.conf")) {
         std::cout << "Creating configuration file" << std::endl;
-        std::ofstream config ("config.conf");
-        config.close();
+        std::ofstream configFile ("config.conf");
+        configFile.close();
     }
+    std::ofstream configFile;
+    configFile.open("config.conf");
     // Cpu
     std::cout << "CPU:" << std::endl;
     std::cout << "Detected CPU cores: " << num_cpus << std::endl;
     std::cout << "Is this number correct? (y/n):" << std::endl;
     std::cin >> choice;
     if (choice == "y") {
-        std::cout << "Saving CPU config";
-        // Save to config
+        configFile << "NUM_CPUS= " << num_cpus << std::endl;
     } else if (choice == "n") {
         std::cout << "CPU configuration will not be saved at the moment" << std::endl;
     } else {
         std::cout << "Invalid argument" << std::endl;
     }
+    std::cout << "Saving CPU config" << std::endl;
     blankline();
     //Memory
     std::cout << "Memory:" << std::endl;
@@ -70,11 +72,12 @@ void config() {
     std::cout << "Is this number correct? (y/n):" << std::endl;
     std::cin >> choice;
     if (choice == "y") {
-        std::cout << "Saving memory config" << std::endl;
-        // Save to config
+        configFile << "MEMORY_SIZE= " << memorySize << std::endl;
     } else if (choice == "n") {
         std::cout << "Memory configuration will not be saved at the moment" << std::endl;
     }
+    std::cout << "Saving memory config" << std::endl;
+    configFile.close();
     blankline();
 }
 

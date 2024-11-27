@@ -6,6 +6,7 @@
 #include <ctime>
 #include <filesystem>
 #include <fstream>
+#include <algorithm>
 
 // Define command to clear terminal
 #ifdef __linux__
@@ -24,7 +25,7 @@ void clear_screen() {
 
 void blankline() {
     // Leave an empty line
-    std::cout << "\n";
+    std::cout << '\n';
 }
 
 void get_time() {
@@ -43,66 +44,50 @@ void config() {
     // Configure hardware
     clear_screen();
     // Cpu
-    long num_cpus = sysconf(_SC_NPROCESSORS_ONLN);
+    long number_of_cpus = sysconf(_SC_NPROCESSORS_ONLN);
     // Memory
-    long num_pages = sysconf(_SC_PHYS_PAGES);
+    long number_of_pages = sysconf(_SC_PHYS_PAGES);
     long page_size = sysconf(_SC_PAGE_SIZE);
-    int memory_size = num_pages*page_size/pow(1024,2);
+    int memory_size = number_of_pages*page_size/pow(1024,2);
     std::string choice;
     // Create/open config file
     if (!if_file_exists("config.conf")) {
         std::cout << "Creating configuration file" << std::endl;
-        std::ofstream config_file ("config.conf");
-        config_file.close();
+        std::ofstream write_config ("config.conf");
+        write_config.close();
     }
-    std::ofstream config_file;
-    config_file.open("config.conf");
+    std::ofstream write_config;
+    write_config.open("config.conf");
     // Cpu
     std::cout << "CPU:" << std::endl;
-    std::cout << "Detected CPU cores: " << num_cpus << std::endl;
-    std::cout << "Is this number correct? (y/n):" << std::endl;
-    std::cin >> choice;
-    if (choice == "y") {
-        config_file << "NUM_CPUS= " << num_cpus << std::endl;
-    } else if (choice == "n") {
-        std::cout << "CPU configuration will not be saved at the moment" << std::endl;
-    } else {
-        std::cout << "Invalid argument" << std::endl;
-    }
-    std::cout << "Saving CPU config" << std::endl;
+    std::cout << "Detected CPU cores: " << number_of_cpus << std::endl;
+    write_config << "NUMBER_OF_CPUS= " << number_of_cpus << std::endl;
+    std::cout << "CPU config saved" << std::endl;
     blankline();
     //Memory
     std::cout << "Memory:" << std::endl;
     std::cout << "Detected memory size: " << memory_size << std::endl;
-    std::cout << "This might be a little less than your actual memory size" << std::endl;
-    std::cout << "Is this number correct? (y/n):" << std::endl;
-    std::cin >> choice;
-    if (choice == "y") {
-        config_file << "MEMORY_SIZE= " << memory_size << std::endl;
-    } else if (choice == "n") {
-        std::cout << "Memory configuration will not be saved at the moment" << std::endl;
-    }
-    std::cout << "Saving memory config" << std::endl;
-    config_file.close();
+    write_config << "MEMORY_SIZE= " << memory_size << std::endl;
+    std::cout << "Memory config saved" << std::endl;
+    write_config.close();
     blankline();
 }
 
 void hardware_info() {
     // Get hardware info
     clear_screen();
-    long num_cpus = sysconf( _SC_NPROCESSORS_ONLN );
-    long num_pages = sysconf(_SC_PHYS_PAGES);
+    long number_of_cpus = sysconf( _SC_NPROCESSORS_ONLN );
+    long number_of_pages = sysconf(_SC_PHYS_PAGES);
     long page_size = sysconf(_SC_PAGE_SIZE);
-    int memory_size = num_pages*page_size/pow(1024,2);
+    int memory_size = number_of_pages*page_size/pow(1024,2);
     std::cout << "Hardware info" << std::endl;
     get_time();
     // CPU
     std::cout << "CPU:" << std::endl;
-    std::cout << "Number of cores: " << num_cpus << std::endl;
+    std::cout << "Number of cores: " << number_of_cpus << std::endl;
     blankline();
     // Memory
     std::cout << "Memory:" << std::endl;
-    //std::cout << "[DEBUG] " << num_pages << " num_pages " << page_size << " page_size" << std::endl;
     std::cout << "Memory size: " << memory_size << "MB" << std::endl;
     blankline();
     // Drives
@@ -112,13 +97,39 @@ void hardware_info() {
 
 void selftest() {
     // Selftest
+    int number_of_cpus;
+    int memory_size;
     std::cout << "Selftest" << std::endl;
     //Check if config exists
     if (!if_file_exists("config.conf")) {
         std::cout << "No configuration file" << std::endl;
-    } else if (if_file_exists("config.conf")) {
+        blankline();
+        return;
+    } else {
         std::cout << "Configuration file detected" << std::endl;
     }
+    std::ifstream read_config ("config.conf");
+    if (read_config.is_open()) {
+        std::string line;
+        while (getline(read_config, line)) {
+            line.erase(std::remove_if(line.begin(), line.end(), isspace), line.end());
+            if (line[0] == '#' || line.empty()) {
+                continue;
+            }
+            auto delimiter_position = line.find("=");
+            auto name = line.substr(0, delimiter_position);
+            auto value = line.substr(delimiter_position + 1);
+            if (name == "NUMBER_OF_CPUS") {
+                number_of_cpus = std::stoi(value);
+            } else if (name == "MEMORY_SIZE") {
+                memory_size = std::stoi(value);
+            }
+        }
+    } else {
+        std::cerr << "Couldn't open configuration file" << std::endl;
+    }
+    std::cout << "Number of cpus= " << number_of_cpus << std::endl;
+    std::cout << "Memory size= " << memory_size << " MB" << std::endl;
     blankline();
 }
 
@@ -133,9 +144,9 @@ void main_display() {
 
 int main(int argc, char const *argv[]) {
     int command;
+    // Main function
     clear_screen();
-    // Info
-    std::cout << "Welcome to the Panel" << std::endl;
+    std::cout << "Panel" << std::endl;
     blankline();
     //selftest, read config from a file and compare it to hardware_info()
     selftest();
@@ -145,10 +156,6 @@ int main(int argc, char const *argv[]) {
     // Main menu
     clear_screen();
     while (command != 99) {
-        std::cout << "0. Config" << std::endl;
-        std::cout << "1. Hardware info" << std::endl;
-        std::cout << "2. Main display" << std::endl;
-        std::cout << "99. Exit" << std::endl;
         std::cout << "> ";
         if (!(std::cin >> command)) {
             std::cin.clear();

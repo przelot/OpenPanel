@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <fstream>
 #include <algorithm>
+#include <thread>
 
 // Define command to clear terminal
 #ifdef __linux__
@@ -28,6 +29,11 @@ void blankline() {
     std::cout << '\n';
 }
 
+void sleep(int seconds) {
+    // Do nothing for X seconds
+    std::this_thread::sleep_for(std::chrono::seconds(seconds));
+}
+
 void get_time() {
     // Get current time
     auto time = std::chrono::system_clock::now();
@@ -39,6 +45,8 @@ bool if_file_exists(const std::string& filename) {
     // Check if a file exists
     return std::filesystem::exists(filename);
 }
+
+// ! Only functions above allowed in functions bellow !
 
 void config() {
     // Configure hardware
@@ -76,12 +84,14 @@ void config() {
 void hardware_info() {
     // Get hardware info
     clear_screen();
+    //Cpu
     long number_of_cpus = sysconf( _SC_NPROCESSORS_ONLN );
+    // Memory
     long number_of_pages = sysconf(_SC_PHYS_PAGES);
     long page_size = sysconf(_SC_PAGE_SIZE);
     int memory_size = number_of_pages*page_size/pow(1024,2);
     std::cout << "Hardware info" << std::endl;
-    get_time();
+    blankline();
     // CPU
     std::cout << "CPU:" << std::endl;
     std::cout << "Number of cores: " << number_of_cpus << std::endl;
@@ -104,6 +114,7 @@ void selftest() {
     if (!if_file_exists("config.conf")) {
         std::cout << "No configuration file" << std::endl;
         blankline();
+        sleep(3);
         return;
     } else {
         std::cout << "Configuration file detected" << std::endl;
@@ -126,10 +137,11 @@ void selftest() {
             }
         }
     } else {
-        std::cerr << "Couldn't open configuration file" << std::endl;
+        std::cout << "Couldn't open configuration file" << std::endl;
     }
     std::cout << "Number of cpus= " << number_of_cpus << std::endl;
     std::cout << "Memory size= " << memory_size << " MB" << std::endl;
+    sleep(3);
     blankline();
 }
 

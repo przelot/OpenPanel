@@ -116,9 +116,19 @@ void hardware_info() {
 
 void selftest() {
     // Selftest
-    std::string hostname;
-    int number_of_cpus;
-    int memory_size;
+    // Host
+    std::string hostname_from_config;
+    char hostname[HOST_NAME_MAX];
+    gethostname(hostname, HOST_NAME_MAX);
+    // CPU
+    int number_of_cpus_from_config;
+    long number_of_cpus = sysconf(_SC_NPROCESSORS_ONLN);
+    // Memory
+    int memory_size_from_config;
+    long number_of_pages = sysconf(_SC_PHYS_PAGES);
+    long page_size = sysconf(_SC_PAGE_SIZE);
+    int memory_size = number_of_pages*page_size/pow(1024, 2);
+    
     std::cout << "Selftest" << std::endl;
     //Check if config exists
     if (!if_file_exists("config.conf")) {
@@ -141,19 +151,31 @@ void selftest() {
             auto name = line.substr(0, delimiter_position);
             auto value = line.substr(delimiter_position + 1);
             if (name == "HOSTNAME") {
-                hostname = value;
+                hostname_from_config = value;
             } else if (name == "NUMBER_OF_CPUS") {
-                number_of_cpus = std::stoi(value);
+                number_of_cpus_from_config = std::stoi(value);
             } else if (name == "MEMORY_SIZE") {
-                memory_size = std::stoi(value);
+                memory_size_from_config = std::stoi(value);
             }
         }
     } else {
         std::cout << "Couldn't open configuration file" << std::endl;
     }
-    std::cout << "Hostname= " << hostname << std::endl;
-    std::cout << "Number of cpus= " << number_of_cpus << std::endl;
-    std::cout << "Memory size= " << memory_size << " MB" << std::endl;
+    blankline();
+    std::cout << "Hostname= " << hostname << " From config= " << hostname_from_config << std::endl;
+    if (hostname_from_config != hostname) {
+        std::cout << "Saved hostname doesn't match the actual value" << std::endl;
+    }
+    blankline();
+    std::cout << "Number of cpus= " << number_of_cpus << " From config= " << number_of_cpus_from_config << std::endl;
+    if (number_of_cpus_from_config != number_of_cpus) {
+        std::cout << "Saved CPU cores number doesn't match the actual value" << std::endl;
+    }
+    blankline();
+    std::cout << "Memory size= " << memory_size_from_config << " MB" << " From config= " << memory_size_from_config << " MB" << std::endl;
+    if (memory_size_from_config != memory_size) {
+        std::cout << "Saved memory size doesn't match the actual value" << std::endl;
+    }
     sleep(3);
     blankline();
 }
@@ -173,8 +195,9 @@ int main(int argc, char const *argv[]) {
     clear_screen();
     std::cout << "Panel" << std::endl;
     blankline();
-    //selftest, read config from a file and compare it to hardware_info()
+    // Selftest
     selftest();
+    // Wait for user input to continue
     do {
         std::cout << "Press enter to continue..." << std::endl;
     } while (std::cin.get() != '\n');

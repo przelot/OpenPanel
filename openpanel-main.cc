@@ -10,14 +10,15 @@
 #include <thread>
 #include <unistd.h>
 
-// Define command to clear terminal
+// Check operating system
 #ifdef __linux__
     char clear_screen_command[6] = "clear";
 #elif _WIN32 or _WIN64
-    char clear_screen_command[4] = "cls";
+    std::cout << "This is version for linux, please download windows version."
+    return 0;
 #else
     std::cout << "Undefined operating system" << std::endl;
-    char clear_screen_command[5] = "echo"
+    return 0;
 #endif
 
 void clear_screen() {
@@ -164,7 +165,7 @@ void selftest() {
     blankline();
     std::cout << "Hostname= " << hostname << " From config= " << hostname_from_config << std::endl;
     if (hostname_from_config != hostname) {
-        std::cout << "Saved hostname doesn't match the actual value" << std::endl;
+        std::cout << "Configuration file may originate from another system" << std::endl;
     }
     blankline();
     std::cout << "Number of cpus= " << number_of_cpus << " From config= " << number_of_cpus_from_config << std::endl;

@@ -6,10 +6,11 @@
 #ifdef __linux__
     char clear_screen_command[6] = "clear";
 #elif _WIN32 or _WIN64
-    char clear_screen_command[4] = "cls";
+    std::cout << "This is version for linux, please download windows version."
+    return 0;
 #else
     std::cout << "Undefined operating system" << std::endl;
-    char clear_screen_command[5] = "echo"
+    return 0;
 #endif
 
 void clear_screen() {

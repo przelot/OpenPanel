@@ -2,6 +2,11 @@
 #include <thread>
 #include <chrono>
 
+#include <cstring>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <unistd.h>
+
 // Define command to clear terminal
 #ifdef __linux__
     char clear_screen_command[6] = "clear";
@@ -35,9 +40,27 @@ void get_time() {
     std::cout << "Current time: " << std::ctime(&time_now);
 }
 
+void socket_server() {
+    int client_socket = socket(AF_INET, SOCK_STREAM, 0);
+
+    sockaddr_in server_address;
+    server_address.sin_family = AF_INET;
+    server_address.sin_port = htons(8080);
+    server_address.sin_addr.s_addr = INADDR_ANY;
+
+    connect(client_socket, (struct sockaddr*)&server_address, sizeof(server_address));
+
+    const char* message = "hello";
+    send(client_socket, message, strlen(message), 0);
+
+    close(client_socket);
+}
+
 int main(int argc, char const *argv[])
 {
     // Main function
     std::cout << "Panel - Client" << std::endl;
+
+    socket_server();
     return 0;
 }

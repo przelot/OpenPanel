@@ -10,6 +10,10 @@
 #include <thread>
 #include <unistd.h>
 
+#include <cstring>
+#include <netinet/in.h>
+#include <sys/socket.h>
+
 // Check operating system
 #ifdef __linux__
     char clear_screen_command[6] = "clear";
@@ -181,6 +185,26 @@ void selftest() {
     blankline();
 }
 
+void socket_server() {
+    int server_socket = socket(AF_INET, SOCK_STREAM, 0);
+    sockaddr_in server_address;
+    server_address.sin_family = AF_INET;
+    server_address.sin_port = htons(8080);
+    server_address.sin_addr.s_addr = INADDR_ANY;
+
+    bind(server_socket, (struct  sockaddr*)&server_address, sizeof(server_address));
+
+    listen(server_socket, 5);
+
+    int client_socket = accept(server_socket, nullptr, nullptr);
+
+    char buffer[1024] = { 0 };
+    recv(client_socket, buffer, sizeof(buffer), 0);
+    std::cout << "Message from client:" << buffer << std::endl;
+
+    close(server_socket);
+}
+
 void main_display() {
     // Main status display
     clear_screen();
@@ -224,6 +248,8 @@ int main(int argc, char const *argv[]) {
             case 2:
                 main_display();
                 break;
+            case 3:
+                socket_server();
             case 99:
                 std::cout << "Exit" << std::endl;
                 return 0;

@@ -8,6 +8,7 @@
 #include <fstream>
 #include <algorithm>
 #include <thread>
+#include <limits.h>
 
 // Define command to clear terminal
 #ifdef __linux__
@@ -51,6 +52,9 @@ bool if_file_exists(const std::string& filename) {
 void config() {
     // Configure hardware
     clear_screen();
+    // Host
+    char hostname[HOST_NAME_MAX];
+    gethostname(hostname, HOST_NAME_MAX);
     // Cpu
     long number_of_cpus = sysconf(_SC_NPROCESSORS_ONLN);
     // Memory
@@ -66,6 +70,11 @@ void config() {
     }
     std::ofstream write_config;
     write_config.open("config.conf");
+    // Host
+    std::cout << "Host:" << std::endl;
+    std::cout << "Hostname: " << hostname << std::endl;
+    write_config << "HOSTNAME= " << hostname << std::endl;
+    blankline();
     // Cpu
     std::cout << "CPU:" << std::endl;
     std::cout << "Detected CPU cores: " << number_of_cpus << std::endl;
@@ -107,6 +116,7 @@ void hardware_info() {
 
 void selftest() {
     // Selftest
+    std::string hostname;
     int number_of_cpus;
     int memory_size;
     std::cout << "Selftest" << std::endl;
@@ -130,7 +140,9 @@ void selftest() {
             auto delimiter_position = line.find("=");
             auto name = line.substr(0, delimiter_position);
             auto value = line.substr(delimiter_position + 1);
-            if (name == "NUMBER_OF_CPUS") {
+            if (name == "HOSTNAME") {
+                hostname = value;
+            } else if (name == "NUMBER_OF_CPUS") {
                 number_of_cpus = std::stoi(value);
             } else if (name == "MEMORY_SIZE") {
                 memory_size = std::stoi(value);
@@ -139,6 +151,7 @@ void selftest() {
     } else {
         std::cout << "Couldn't open configuration file" << std::endl;
     }
+    std::cout << "Hostname= " << hostname << std::endl;
     std::cout << "Number of cpus= " << number_of_cpus << std::endl;
     std::cout << "Memory size= " << memory_size << " MB" << std::endl;
     sleep(3);

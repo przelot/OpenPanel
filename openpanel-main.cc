@@ -1,14 +1,14 @@
-#include <iostream>
-#include <unistd.h>
-#include <cmath>
-#include <cpuid.h>
+#include <algorithm>
 #include <chrono>
+#include <cmath>
 #include <ctime>
+#include <cpuid.h>
 #include <filesystem>
 #include <fstream>
-#include <algorithm>
-#include <thread>
+#include <iostream>
 #include <limits.h>
+#include <thread>
+#include <unistd.h>
 
 // Define command to clear terminal
 #ifdef __linux__
@@ -63,13 +63,13 @@ void config() {
     int memory_size = number_of_pages*page_size/pow(1024,2);
     std::string choice;
     // Create/open config file
-    if (!if_file_exists("config.conf")) {
+    if (!if_file_exists("main-config.conf")) {
         std::cout << "Creating configuration file" << std::endl;
-        std::ofstream write_config ("config.conf");
+        std::ofstream write_config ("main-config.conf");
         write_config.close();
     }
     std::ofstream write_config;
-    write_config.open("config.conf");
+    write_config.open("main-config.conf");
     // Host
     std::cout << "Host:" << std::endl;
     std::cout << "Hostname: " << hostname << std::endl;
@@ -131,7 +131,7 @@ void selftest() {
     
     std::cout << "Selftest" << std::endl;
     //Check if config exists
-    if (!if_file_exists("config.conf")) {
+    if (!if_file_exists("main-config.conf")) {
         std::cout << "No configuration file" << std::endl;
         blankline();
         sleep(3);
@@ -139,7 +139,7 @@ void selftest() {
     } else {
         std::cout << "Configuration file detected" << std::endl;
     }
-    std::ifstream read_config ("config.conf");
+    std::ifstream read_config ("main-config.conf");
     if (read_config.is_open()) {
         std::string line;
         while (getline(read_config, line)) {

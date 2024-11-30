@@ -191,17 +191,12 @@ void socket_server() {
     server_address.sin_family = AF_INET;
     server_address.sin_port = htons(8080);
     server_address.sin_addr.s_addr = INADDR_ANY;
-
     bind(server_socket, (struct  sockaddr*)&server_address, sizeof(server_address));
-
     listen(server_socket, 5);
-
     int client_socket = accept(server_socket, nullptr, nullptr);
-
     char buffer[1024] = { 0 };
     recv(client_socket, buffer, sizeof(buffer), 0);
     std::cout << "Message from client:" << buffer << std::endl;
-
     close(server_socket);
 }
 

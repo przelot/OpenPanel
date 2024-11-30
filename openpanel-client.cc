@@ -105,11 +105,44 @@ void socket_server() {
     close(client_socket);
 }
 
-int main(int argc, char const *argv[])
-{
+int main(int argc, char const *argv[]) {
+    int command;
     // Main function
+    clear_screen();
     std::cout << "Panel - Client" << std::endl;
-
-    socket_server();
-    return 0;
+    blankline();
+    // Selftest here
+    // Wait for user input to continue
+    do {
+        std::cout << "Press enter to continue..." << std::endl;
+    } while (std::cin.get() != '\n');
+    // Main menu
+    clear_screen();
+    while (command != 99) {
+        std::cout << "> ";
+        if (!(std::cin >> command)) {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            clear_screen();
+            std::cout << "Invalid argument" << std::endl;
+            blankline();
+            continue;
+        }
+        switch (command) {
+            case 0:
+                config();
+                break;
+            case 3:
+                socket_server();
+            case 99:
+                std::cout << "Exit" << std::endl;
+                return 0;
+                break;
+            default:
+                clear_screen();
+                std::cout << "Invalid argument" << std::endl;
+                blankline();
+                break;
+        }
+    }
 }

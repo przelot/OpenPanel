@@ -1,4 +1,5 @@
-/a.out
+a.out
 main-config.conf
 test.cc
 client.out
+client-config.conf

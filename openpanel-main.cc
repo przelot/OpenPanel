@@ -71,13 +71,13 @@ void config() {
     int memory_size = number_of_pages*page_size/pow(1024,2);
     std::string choice;
     // Create/open config file
-    if (!if_file_exists("main-config.conf")) {
+    if (!if_file_exists("Assets/main-config.conf")) {
         std::cout << "Creating configuration file" << std::endl;
-        std::ofstream write_config ("main-config.conf");
+        std::ofstream write_config ("Assets/main-config.conf");
         write_config.close();
     }
     std::ofstream write_config;
-    write_config.open("main-config.conf");
+    write_config.open("Assets/main-config.conf");
     // Hostname
     std::cout << "Host:" << std::endl;
     std::cout << "Hostname: " << hostname << std::endl;
@@ -140,7 +140,7 @@ void selftest() {
     
     std::cout << "Selftest" << std::endl;
     //Check if config exists
-    if (!if_file_exists("main-config.conf")) {
+    if (!if_file_exists("Assets/main-config.conf")) {
         std::cout << "No configuration file" << std::endl;
         blankline();
         sleep(3);
@@ -148,7 +148,7 @@ void selftest() {
     } else {
         std::cout << "Configuration file detected" << std::endl;
     }
-    std::ifstream read_config ("main-config.conf");
+    std::ifstream read_config ("Assets/main-config.conf");
     if (read_config.is_open()) {
         std::string line;
         while (getline(read_config, line)) {

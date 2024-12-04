@@ -1,5 +1,6 @@
 a.out
-main-config.conf
 test.cc
 client.out
-client-config.conf
+Assets/client-config.conf
+Assets/main-config.conf
+Assets/hosts.txt

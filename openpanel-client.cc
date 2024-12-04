@@ -65,13 +65,13 @@ void config() {
     int memory_size = number_of_pages*page_size/pow(1024,2);
     std::string choice;
     // Create/open config file
-    if (!if_file_exists("client-config.conf")) {
+    if (!if_file_exists("Assets/client-config.conf")) {
         std::cout << "Creating configuration file" << std::endl;
-        std::ofstream write_config ("client-config.conf");
+        std::ofstream write_config ("Assets/client-config.conf");
         write_config.close();
     }
     std::ofstream write_config;
-    write_config.open("client-config.conf");
+    write_config.open("Assets/client-config.conf");
     // Host
     std::cout << "Host:" << std::endl;
     std::cout << "Hostname: " << hostname << std::endl;

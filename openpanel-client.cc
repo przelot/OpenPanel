@@ -93,14 +93,20 @@ void config() {
 }
 
 void socket_server() {
-    // Client side of the socket server
+    // Socket server configurtion
     int client_socket = socket(AF_INET, SOCK_STREAM, 0);
     sockaddr_in server_address;
     server_address.sin_family = AF_INET;
     server_address.sin_port = htons(8080);
+    // Server address
     server_address.sin_addr.s_addr = INADDR_ANY;
+    // Get hostname
+    char hostname[HOST_NAME_MAX];
+    gethostname(hostname, HOST_NAME_MAX);
+    // Connect with openpanel-main
     connect(client_socket, (struct sockaddr*)&server_address, sizeof(server_address));
-    const char* message = "Client connected";
+    // Send message to openpanel-main
+    const char* message = hostname;
     send(client_socket, message, strlen(message), 0);
     close(client_socket);
 }
@@ -134,6 +140,7 @@ int main(int argc, char const *argv[]) {
                 break;
             case 3:
                 socket_server();
+                break;
             case 99:
                 std::cout << "Exit" << std::endl;
                 return 0;

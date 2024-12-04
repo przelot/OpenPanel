@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <arpa/inet.h>
 #include <chrono>
 #include <cmath>
 #include <ctime>
@@ -9,7 +10,7 @@
 #include <limits.h>
 #include <thread>
 #include <unistd.h>
-
+#include <netdb.h>
 #include <cstring>
 #include <netinet/in.h>
 #include <sys/socket.h>
@@ -57,9 +58,11 @@ bool if_file_exists(const std::string& filename) {
 void config() {
     // Configure hardware
     clear_screen();
-    // Host
+    // Hostname
     char hostname[HOST_NAME_MAX];
     gethostname(hostname, HOST_NAME_MAX);
+    // Local IP address
+    char* local_ip_address;
     // Cpu
     long number_of_cpus = sysconf(_SC_NPROCESSORS_ONLN);
     // Memory
@@ -75,11 +78,12 @@ void config() {
     }
     std::ofstream write_config;
     write_config.open("main-config.conf");
-    // Host
+    // Hostname
     std::cout << "Host:" << std::endl;
     std::cout << "Hostname: " << hostname << std::endl;
     write_config << "HOSTNAME= " << hostname << std::endl;
     blankline();
+    // Local IP address
     // Cpu
     std::cout << "CPU:" << std::endl;
     std::cout << "Detected CPU cores: " << number_of_cpus << std::endl;
@@ -181,6 +185,7 @@ void selftest() {
     if (memory_size_from_config != memory_size) {
         std::cout << "Saved memory size doesn't match the actual value" << std::endl;
     }
+    read_config.close();
     sleep(3);
     blankline();
 }
@@ -190,6 +195,7 @@ void socket_server() {
     sockaddr_in server_address;
     server_address.sin_family = AF_INET;
     server_address.sin_port = htons(8080);
+    // Server address
     server_address.sin_addr.s_addr = INADDR_ANY;
     bind(server_socket, (struct  sockaddr*)&server_address, sizeof(server_address));
     listen(server_socket, 5);
@@ -245,6 +251,7 @@ int main(int argc, char const *argv[]) {
                 break;
             case 3:
                 socket_server();
+                break;
             case 99:
                 std::cout << "Exit" << std::endl;
                 return 0;

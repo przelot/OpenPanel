@@ -277,6 +277,9 @@ int main(int argc, char const *argv[]) {
             case 3:
                 socket_server();
                 break;
+            case 98:
+                selftest();
+                break;
             case 99:
                 std::cout << "Exit" << std::endl;
                 return 0;

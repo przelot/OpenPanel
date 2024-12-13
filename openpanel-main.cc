@@ -17,8 +17,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-// Signs used: ✔ ✖ !
-
 // Check operating system
 #ifdef __linux__
     char clear_screen_command[6] = "clear";
@@ -84,12 +82,12 @@ void config() {
     int memory_size = number_of_pages*page_size/pow(1024,2);
     // Check/create "Assets" directory
     if (!if_directory_exists("Assets")) {
-        std::cout << "[✔] Creating assets directory" << std::endl;
+        std::cout << "[OK] Creating assets directory" << std::endl;
         std::filesystem::create_directory("Assets");
     }
     // Create/open config file
     if (!if_file_exists("Assets/main-config.conf")) {
-        std::cout << "[✔] Creating configuration file" << std::endl;
+        std::cout << "[OK] Creating configuration file" << std::endl;
         std::ofstream write_config ("Assets/main-config.conf");
         write_config.close();
     }
@@ -99,20 +97,20 @@ void config() {
     std::cout << "Host:" << std::endl;
     std::cout << "Hostname: " << hostname << std::endl;
     write_config << "HOSTNAME= " << hostname << std::endl;
-    std::cout << "[✔] Host config saved" << std::endl;
+    std::cout << "[OK] Host config saved" << std::endl;
     blankline();
     // Local IP address
     // Cpu
     std::cout << "CPU:" << std::endl;
     std::cout << "Detected CPU cores: " << number_of_cpus << std::endl;
     write_config << "NUMBER_OF_CPUS= " << number_of_cpus << std::endl;
-    std::cout << "[✔] CPU config saved" << std::endl;
+    std::cout << "[OK] CPU config saved" << std::endl;
     blankline();
     //Memory
     std::cout << "Memory:" << std::endl;
     std::cout << "Detected memory size: " << memory_size << std::endl;
     write_config << "MEMORY_SIZE= " << memory_size << std::endl;
-    std::cout << "[✔] Memory config saved" << std::endl;
+    std::cout << "[OK] Memory config saved" << std::endl;
     write_config.close();
     blankline();
 }
@@ -158,19 +156,19 @@ void selftest() {
     std::cout << "Selftest" << std::endl;
     //Check if "assets" directory exists
     if (!if_directory_exists("Assets")) {
-        std::cout << "[✖] No assets directory" << std::endl;
+        std::cout << "[ERROR] No assets directory" << std::endl;
         sleep(2);
         return;
     } else {
-        std::cout << "[✔] Assets directory detected" << std::endl;
+        std::cout << "[OK] Assets directory detected" << std::endl;
     }
     //Check if config exists
     if (!if_file_exists("Assets/main-config.conf")) {
-        std::cout << "[✖] No configuration file" << std::endl;
+        std::cout << "[ERROR] No configuration file" << std::endl;
         sleep(2);
         return;
     } else {
-        std::cout << "[✔] Configuration file detected" << std::endl;
+        std::cout << "[OK] Configuration file detected" << std::endl;
     }
     sleep(1);
     std::ifstream read_config ("Assets/main-config.conf");
@@ -193,22 +191,22 @@ void selftest() {
             }
         }
     } else {
-        std::cout << "[✖] Couldn't open configuration file" << std::endl;
+        std::cout << "[ERROR] Couldn't open configuration file" << std::endl;
     }
     blankline();
     std::cout << "Hostname= " << hostname << " From config= " << hostname_from_config << std::endl;
     if (hostname_from_config != hostname) {
-        std::cout << "[!] Configuration file may originate from another system" << std::endl;
+        std::cout << "[WARNING] Configuration file may originate from another system" << std::endl;
     }
     blankline();
     std::cout << "Number of cpus= " << number_of_cpus << " From config= " << number_of_cpus_from_config << std::endl;
     if (number_of_cpus_from_config != number_of_cpus) {
-        std::cout << "[!] Saved CPU cores number doesn't match the actual value" << std::endl;
+        std::cout << "[WARNING] Saved CPU cores number doesn't match the actual value" << std::endl;
     }
     blankline();
     std::cout << "Memory size= " << memory_size_from_config << " MB" << " From config= " << memory_size_from_config << " MB" << std::endl;
     if (memory_size_from_config != memory_size) {
-        std::cout << "[!] Saved memory size doesn't match the actual value" << std::endl;
+        std::cout << "[WARNING] Saved memory size doesn't match the actual value" << std::endl;
     }
     read_config.close();
     sleep(3);

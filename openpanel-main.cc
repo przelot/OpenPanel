@@ -69,6 +69,7 @@ bool if_file_exists(const std::string& filename) {
 void config() {
     // Configure hardware
     clear_screen();
+    int command;
     // Hostname
     char hostname[HOST_NAME_MAX];
     gethostname(hostname, HOST_NAME_MAX);
@@ -84,15 +85,32 @@ void config() {
     if (!if_directory_exists("Assets")) {
         std::cout << "[OK] Creating assets directory" << std::endl;
         std::filesystem::create_directory("Assets");
+    } else {
+        std::cout << "[OK] Assets directory already exists" << std::endl;
     }
     // Create/open config file
     if (!if_file_exists("Assets/main-config.conf")) {
         std::cout << "[OK] Creating configuration file" << std::endl;
         std::ofstream write_config ("Assets/main-config.conf");
         write_config.close();
+    } else {
+        std::cout << "[OK] Configuration file already exists" << std::endl;
+        std::cout << "Want to overwrite configuration? (0=no/1=yes) :";
+        std::cin >> command;
+        switch (command) {
+        case 1:
+            break;
+        case 0:
+            std::cout << "[OK] Abort" << std::endl;
+            return;
+            break;
+        default:
+            std::cout << "[WARNING] Invalid argument" << std::endl;
+            return;
+            break;
+        }
     }
-    std::ofstream write_config;
-    write_config.open("Assets/main-config.conf");
+    std::ofstream write_config("Assets/main-config.conf", std::ofstream::in | std::ofstream::out);
     // Hostname
     std::cout << "Host:" << std::endl;
     std::cout << "Hostname: " << hostname << std::endl;
@@ -153,6 +171,7 @@ void selftest() {
     long number_of_pages = sysconf(_SC_PHYS_PAGES);
     long page_size = sysconf(_SC_PAGE_SIZE);
     int memory_size = number_of_pages*page_size/pow(1024, 2);
+    clear_screen();
     std::cout << "Selftest" << std::endl;
     //Check if "assets" directory exists
     if (!if_directory_exists("Assets")) {
@@ -194,22 +213,29 @@ void selftest() {
         std::cout << "[ERROR] Couldn't open configuration file" << std::endl;
     }
     blankline();
-    std::cout << "Hostname= " << hostname << " From config= " << hostname_from_config << std::endl;
-    if (hostname_from_config != hostname) {
+    if (hostname_from_config == hostname) {
+        std::cout << "[OK] Hostname= " << hostname << " From config= " << hostname_from_config << std::endl;
+    } else {
+        std::cout << "[WARNING] Hostname= " << hostname << " From config= " << hostname_from_config << std::endl;
         std::cout << "[WARNING] Configuration file may originate from another system" << std::endl;
     }
     blankline();
-    std::cout << "Number of cpus= " << number_of_cpus << " From config= " << number_of_cpus_from_config << std::endl;
-    if (number_of_cpus_from_config != number_of_cpus) {
+    
+    if (number_of_cpus_from_config == number_of_cpus) {
+        std::cout << "[OK] Number of cpus= " << number_of_cpus << " From config= " << number_of_cpus_from_config << std::endl;
+    } else {
+        std::cout << "[WARNING] Number of cpus= " << number_of_cpus << " From config= " << number_of_cpus_from_config << std::endl;
         std::cout << "[WARNING] Saved CPU cores number doesn't match the actual value" << std::endl;
     }
     blankline();
-    std::cout << "Memory size= " << memory_size_from_config << " MB" << " From config= " << memory_size_from_config << " MB" << std::endl;
-    if (memory_size_from_config != memory_size) {
+    
+    if (memory_size_from_config == memory_size) {
+        std::cout << "[OK] Memory size= " << memory_size_from_config << " MB" << " From config= " << memory_size_from_config << " MB" << std::endl;
+    } else {
+        std::cout << "[WARNING] Memory size= " << memory_size_from_config << " MB" << " From config= " << memory_size_from_config << " MB" << std::endl;
         std::cout << "[WARNING] Saved memory size doesn't match the actual value" << std::endl;
     }
     read_config.close();
-    sleep(3);
     blankline();
 }
 
@@ -273,18 +299,21 @@ int main(int argc, char const *argv[]) {
                 main_display();
                 break;
             case 3:
-                socket_server();
+                //socket_server();
+                clear_screen();
+                std::cout << "[WARNING] Socket server is not available for now" << std::endl;
+                blankline();
                 break;
             case 98:
                 selftest();
                 break;
             case 99:
-                std::cout << "Exit" << std::endl;
+                std::cout << "[OK] Exit" << std::endl;
                 return 0;
                 break;
             default:
                 clear_screen();
-                std::cout << "Invalid argument" << std::endl;
+                std::cout << "[WARNING] Invalid argument" << std::endl;
                 blankline();
                 break;
         }

@@ -15,7 +15,7 @@
 
 // Define command to clear terminal
 #ifdef __linux__
-    char clear_screen_command[6] = "clear";
+    char clearScreenCommand[6] = "clear";
 #elif _WIN32 or _WIN64
     std::cout << "This is version for linux, please download windows version."
     return 0;
@@ -26,7 +26,7 @@
 
 void clear_screen() {
     // Clear the terminal
-    system(clear_screen_command);
+    system(clearScreenCommand);
 }
 
 void blankline() {
@@ -58,37 +58,37 @@ void config() {
     char hostname[HOST_NAME_MAX];
     gethostname(hostname, HOST_NAME_MAX);
     // Cpu
-    long number_of_cpus = sysconf(_SC_NPROCESSORS_ONLN);
+    long numberOfCpus = sysconf(_SC_NPROCESSORS_ONLN);
     // Memory
-    long number_of_pages = sysconf(_SC_PHYS_PAGES);
-    long page_size = sysconf(_SC_PAGE_SIZE);
-    int memory_size = number_of_pages*page_size/pow(1024,2);
+    long numberOfPages = sysconf(_SC_PHYS_PAGES);
+    long pageSize = sysconf(_SC_PAGE_SIZE);
+    int memorySize = numberOfPages*pageSize/pow(1024,2);
     std::string choice;
     // Create/open config file
     if (!if_file_exists("Assets/client-config.conf")) {
         std::cout << "Creating configuration file" << std::endl;
-        std::ofstream write_config ("Assets/client-config.conf");
-        write_config.close();
+        std::ofstream writeConfig ("Assets/client-config.conf");
+        writeConfig.close();
     }
-    std::ofstream write_config;
-    write_config.open("Assets/client-config.conf");
+    std::ofstream writeConfig;
+    writeConfig.open("Assets/client-config.conf");
     // Host
     std::cout << "Host:" << std::endl;
     std::cout << "Hostname: " << hostname << std::endl;
-    write_config << "HOSTNAME= " << hostname << std::endl;
+    writeConfig << "HOSTNAME= " << hostname << std::endl;
     blankline();
     // Cpu
     std::cout << "CPU:" << std::endl;
-    std::cout << "Detected CPU cores: " << number_of_cpus << std::endl;
-    write_config << "NUMBER_OF_CPUS= " << number_of_cpus << std::endl;
+    std::cout << "Detected CPU cores: " << numberOfCpus << std::endl;
+    writeConfig << "numberOfCpus= " << numberOfCpus << std::endl;
     std::cout << "CPU config saved" << std::endl;
     blankline();
     //Memory
     std::cout << "Memory:" << std::endl;
-    std::cout << "Detected memory size: " << memory_size << std::endl;
-    write_config << "MEMORY_SIZE= " << memory_size << std::endl;
+    std::cout << "Detected memory size: " << memorySize << std::endl;
+    writeConfig << "memorySize= " << memorySize << std::endl;
     std::cout << "Memory config saved" << std::endl;
-    write_config.close();
+    writeConfig.close();
     blankline();
 }
 

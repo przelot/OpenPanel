@@ -206,9 +206,9 @@ void selftest() {
             auto value = line.substr(delimiterPosition + 1);
             if (name == "HOSTNAME") {
                 hostnameFromConfig = value;
-            } else if (name == "numberOfCpus") {
+            } else if (name == "NUMBER_OF_CPUS") {
                 numberOfCpusFromConfig = std::stoi(value);
-            } else if (name == "memorySize") {
+            } else if (name == "MEMORY_SIZE") {
                 memorySizeFromConfig = std::stoi(value);
             }
         }

@@ -124,13 +124,13 @@ void config() {
     // Cpu
     std::cout << "CPU:" << std::endl;
     std::cout << "Detected CPU cores: " << numberOfCpus << std::endl;
-    writeConfig << "numberOfCpus= " << numberOfCpus << std::endl;
+    writeConfig << "NUMBER_OF_CPUS= " << numberOfCpus << std::endl;
     std::cout << "[OK] CPU config saved" << std::endl;
     blankline();
     //Memory
     std::cout << "Memory:" << std::endl;
     std::cout << "Detected memory size: " << memorySize << std::endl;
-    writeConfig << "memorySize= " << memorySize << std::endl;
+    writeConfig << "MEMORY_SIZE= " << memorySize << std::endl;
     std::cout << "[OK] Memory config saved" << std::endl;
     writeConfig.close();
     blankline();
@@ -216,7 +216,7 @@ void selftest() {
         std::cout << "[ERROR] Couldn't open configuration file" << std::endl;
     }
     blankline();
-    if (hostnameFromConfig == hostname) {
+    if (hostname == hostnameFromConfig) {
         std::cout << "[OK] Hostname= " << hostname << " From config= " << hostnameFromConfig << std::endl;
     } else {
         std::cout << "[WARNING] Hostname= " << hostname << " From config= " << hostnameFromConfig << std::endl;
@@ -224,7 +224,7 @@ void selftest() {
     }
     blankline();
     
-    if (numberOfCpusFromConfig == numberOfCpus) {
+    if (numberOfCpus == numberOfCpusFromConfig) {
         std::cout << "[OK] Number of cpus= " << numberOfCpus << " From config= " << numberOfCpusFromConfig << std::endl;
     } else {
         std::cout << "[WARNING] Number of cpus= " << numberOfCpus << " From config= " << numberOfCpusFromConfig << std::endl;
@@ -232,7 +232,7 @@ void selftest() {
     }
     blankline();
     
-    if (memorySizeFromConfig == memorySize) {
+    if (memorySize == memorySizeFromConfig) {
         std::cout << "[OK] Memory size= " << memorySizeFromConfig << " MB" << " From config= " << memorySizeFromConfig << " MB" << std::endl;
     } else {
         std::cout << "[WARNING] Memory size= " << memorySizeFromConfig << " MB" << " From config= " << memorySizeFromConfig << " MB" << std::endl;

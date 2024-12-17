@@ -98,7 +98,7 @@ void config() {
         writeConfig.close();
     } else {
         std::cout << "[OK] Configuration file already exists" << std::endl;
-        std::cout << "Want to overwrite configuration? (0=no/1=yes) :";
+        std::cout << "Want to overwrite configuration? (0=no/1=yes) : ";
         std::cin >> command;
         switch (command) {
         case 1:
@@ -242,6 +242,17 @@ void selftest() {
     blankline();
 }
 
+void main_menu() {
+    clear_screen();
+    std::cout << "0. This menu" << std::endl;
+    std::cout << "1. System info" << std::endl;
+    std::cout << "2. Main display" << std::endl;
+    std::cout << "3. Socket server" << std::endl;
+    std::cout << "8. Selftest" << std::endl;
+    std::cout << "9. Config" << std::endl;
+    std::cout << "999. Exit" << std::endl;
+}
+
 void main_display() {
     // Main status display
     while (!stop) {
@@ -269,7 +280,8 @@ int main(int argc, char const *argv[]) {
     } while (std::cin.get() != '\n');
     // Main menu
     clear_screen();
-    while (command != 99) {
+    main_menu();
+    while (command != 999) {
         std::cout << "> ";
         if (!(std::cin >> command)) {
             std::cin.clear();
@@ -281,13 +293,15 @@ int main(int argc, char const *argv[]) {
         }
         switch (command) {
             case 0: {
-                config();
+                main_menu();
                 break;
             } case 1: {
                 hardware_info();
                 break;
             } case 2: {
+                clear_screen();
                 std::cout << "[WARNING] Main display is not available for now" << std::endl;
+                blankline();
                 break;
             } case 3: {
                 //socket_server();
@@ -295,10 +309,13 @@ int main(int argc, char const *argv[]) {
                 std::cout << "[WARNING] Socket server is not available for now" << std::endl;
                 blankline();
                 break;
-            } case 98: {
+            } case 8: {
                 selftest();
                 break;
-            } case 99: {
+            } case 9: {
+                config();
+                break;
+            } case 999: {
                 std::cout << "[OK] Exit" << std::endl;
                 return EXIT_SUCCESS;
                 break;

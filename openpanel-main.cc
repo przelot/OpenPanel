@@ -55,7 +55,7 @@ void get_time() {
 
 bool if_directory_exists(const char *path) {
     struct stat info;
-    if (stat(path, &info)!=0) {
+    if(stat(path, &info)!=0) {
         return false;
     } else {
         return true;
@@ -84,59 +84,74 @@ void config() {
     long numberOfPages = sysconf(_SC_PHYS_PAGES);
     long pageSize = sysconf(_SC_PAGE_SIZE);
     int memorySize = numberOfPages*pageSize/pow(1024,2);
+    std::cout << "Configuration" << std::endl;
     // Check/create "Assets" directory
-    if (!if_directory_exists("Assets")) {
+    if(!if_directory_exists("Assets")) {
         std::cout << "[OK] Creating assets directory" << std::endl;
         std::filesystem::create_directory("Assets");
+    } else if(if_directory_exists("Assets")) {
+        std::cout << "[OK] Assets directory exists" << std::endl;
     } else {
-        std::cout << "[OK] Assets directory already exists" << std::endl;
+        std::cout << "[ERROR] Unknown error occured" << std::endl;
     }
-    // Create/open config file
+    sleep(1);
+    // Check config file
     if (!if_file_exists("Assets/main-config.conf")) {
         std::cout << "[OK] Creating configuration file" << std::endl;
-        std::ofstream writeConfig ("Assets/main-config.conf");
+        std::ofstream writeConfig("Assets/main-config.conf");
         writeConfig.close();
+    } else if(if_file_exists("Assets/main-config.conf")) {
+        std::cout << "[OK] Configuration file exists" << std::endl;
     } else {
-        std::cout << "[OK] Configuration file already exists" << std::endl;
-        std::cout << "Want to overwrite configuration? (0=no/1=yes) : ";
-        std::cin >> command;
-        switch (command) {
-        case 1:
-            break;
-        case 0:
-            std::cout << "[OK] Abort" << std::endl;
-            return;
-            break;
-        default:
-            std::cout << "[WARNING] Invalid argument" << std::endl;
-            return;
-            break;
-        }
+        std::cout << "[ERROR] Unknown error occured" << std::endl;
     }
+    sleep(1);
+    // Check network config file
+    if (!if_file_exists("Assets/main-network-config.conf")) {
+        std::cout << "[OK] Creating network configuration file" << std::endl;
+        std::ofstream writeNetworkConfig("Assets/main-network-config.conf");
+        writeNetworkConfig.close();
+    } else if(if_file_exists("Assets/main-network-config.conf")) {
+        std::cout << "[OK] Network configuration file exists" << std::endl;
+    } else {
+        std::cout << "[ERROR] Unknown error occured" << std::endl;
+    }
+    blankline();
+    sleep(1);
+    // Hardware info
     std::ofstream writeConfig("Assets/main-config.conf", std::ofstream::in | std::ofstream::out);
+    std::cout << "Hardware configuration:" << std::endl;
+    sleep(1);
     // Hostname
     std::cout << "Host:" << std::endl;
     std::cout << "Hostname: " << hostname << std::endl;
     writeConfig << "HOSTNAME= " << hostname << std::endl;
     std::cout << "[OK] Host config saved" << std::endl;
-    blankline();
-    // Local IP address
+    sleep(1);
     // Cpu
     std::cout << "CPU:" << std::endl;
     std::cout << "Detected CPU cores: " << numberOfCpus << std::endl;
     writeConfig << "NUMBER_OF_CPUS= " << numberOfCpus << std::endl;
     std::cout << "[OK] CPU config saved" << std::endl;
-    blankline();
+    sleep(1);
     //Memory
     std::cout << "Memory:" << std::endl;
     std::cout << "Detected memory size: " << memorySize << std::endl;
     writeConfig << "MEMORY_SIZE= " << memorySize << std::endl;
     std::cout << "[OK] Memory config saved" << std::endl;
-    writeConfig.close();
     blankline();
+    writeConfig.close();
+    sleep(1);
+    // Network onfig
+    std::ofstream writeNetworkConfig("Assets/main-network-config.conf", std::ofstream::in | std::ofstream::out);
+    std::cout << "Network configuration:" << std::endl;
+    //Local ip address
+    std::cout << "Local IP address:" << std::endl;
+    blankline();
+    sleep(1);
 }
 
-void hardware_info() {
+void show_hardware_info() {
     // Get hardware info
     clear_screen();
     //Cpu
@@ -176,29 +191,46 @@ void selftest() {
     int memorySize = numberOfPages*pageSize/pow(1024, 2);
     clear_screen();
     std::cout << "Selftest" << std::endl;
+    sleep(1);
     //Check if "assets" directory exists
-    if (!if_directory_exists("Assets")) {
+    if(!if_directory_exists("Assets")) {
         std::cout << "[ERROR] No assets directory" << std::endl;
         sleep(2);
         return;
+    } else if(if_directory_exists("Assets")) {
+        std::cout << "[OK] Assets directory found" << std::endl;
+        sleep(1);
     } else {
-        std::cout << "[OK] Assets directory detected" << std::endl;
+        std::cout << "[ERROR] Unknown error occured" << std::endl;
+        sleep(2);
     }
     //Check if config exists
-    if (!if_file_exists("Assets/main-config.conf")) {
+    if(!if_file_exists("Assets/main-config.conf")) {
         std::cout << "[ERROR] No configuration file" << std::endl;
         sleep(2);
-        return;
+    } else if(if_file_exists("Assets/main-config.conf")) {
+        std::cout << "[OK] Configuration file found" << std::endl;
+        sleep(1);
     } else {
-        std::cout << "[OK] Configuration file detected" << std::endl;
+        std::cout << "[ERROR] Unknown error occured" << std::endl;
+        sleep(2);
     }
-    sleep(1);
+    if(!if_file_exists("Assets/main-network-config.conf")) {
+        std::cout << "[CRITICAL] No network configuration file" << std::endl;
+        sleep(2);
+    } else if(if_file_exists("Assets/main-network-config.conf")) {
+        std::cout << "[OK] Network configuration file found" << std::endl;
+        sleep(1);
+    } else {
+        std::cout << "[ERROR] Unknown error occured" << std::endl;
+        sleep(2);
+    }
     std::ifstream readConfig ("Assets/main-config.conf");
-    if (readConfig.is_open()) {
+    if(readConfig.is_open()) {
         std::string line;
-        while (getline(readConfig, line)) {
+        while(getline(readConfig, line)) {
             line.erase(std::remove_if(line.begin(), line.end(), isspace), line.end());
-            if (line[0] == '#' || line.empty()) {
+            if(line[0] == '#' || line.empty()) {
                 continue;
             }
             auto delimiterPosition = line.find("=");
@@ -206,9 +238,9 @@ void selftest() {
             auto value = line.substr(delimiterPosition + 1);
             if (name == "HOSTNAME") {
                 hostnameFromConfig = value;
-            } else if (name == "NUMBER_OF_CPUS") {
+            } else if(name == "NUMBER_OF_CPUS") {
                 numberOfCpusFromConfig = std::stoi(value);
-            } else if (name == "MEMORY_SIZE") {
+            } else if(name == "MEMORY_SIZE") {
                 memorySizeFromConfig = std::stoi(value);
             }
         }
@@ -216,23 +248,22 @@ void selftest() {
         std::cout << "[ERROR] Couldn't open configuration file" << std::endl;
     }
     blankline();
-    if (hostname == hostnameFromConfig) {
+    std::cout << "Configuration:" << std::endl;
+    if(hostname == hostnameFromConfig) {
         std::cout << "[OK] Hostname= " << hostname << " From config= " << hostnameFromConfig << std::endl;
     } else {
         std::cout << "[WARNING] Hostname= " << hostname << " From config= " << hostnameFromConfig << std::endl;
         std::cout << "[WARNING] Configuration file may originate from another system" << std::endl;
     }
     blankline();
-    
-    if (numberOfCpus == numberOfCpusFromConfig) {
+    if(numberOfCpus == numberOfCpusFromConfig) {
         std::cout << "[OK] Number of cpus= " << numberOfCpus << " From config= " << numberOfCpusFromConfig << std::endl;
     } else {
         std::cout << "[WARNING] Number of cpus= " << numberOfCpus << " From config= " << numberOfCpusFromConfig << std::endl;
         std::cout << "[WARNING] Saved CPU cores number doesn't match the actual value" << std::endl;
     }
     blankline();
-    
-    if (memorySize == memorySizeFromConfig) {
+    if(memorySize == memorySizeFromConfig) {
         std::cout << "[OK] Memory size= " << memorySizeFromConfig << " MB" << " From config= " << memorySizeFromConfig << " MB" << std::endl;
     } else {
         std::cout << "[WARNING] Memory size= " << memorySizeFromConfig << " MB" << " From config= " << memorySizeFromConfig << " MB" << std::endl;
@@ -240,9 +271,13 @@ void selftest() {
     }
     readConfig.close();
     blankline();
+    sleep(1);
+    std::cout << "Network configuration:" << std::endl;
+    sleep(1);
+    blankline();
 }
 
-void main_menu() {
+void list_main_menu_items() {
     clear_screen();
     std::cout << "0. This menu" << std::endl;
     std::cout << "1. System info" << std::endl;
@@ -250,20 +285,11 @@ void main_menu() {
     std::cout << "3. Socket server" << std::endl;
     std::cout << "8. Selftest" << std::endl;
     std::cout << "9. Config" << std::endl;
-    std::cout << "999. Exit" << std::endl;
+    std::cout << "99. Exit" << std::endl;
 }
 
-void main_display() {
-    // Main status display
-    while (!stop) {
-        clear_screen();
-        get_time();
-        blankline();
-        std::cout << "Socket server status: " << std::endl;
-        blankline();
-        std::cout << "Press any key to exit" << std::endl;
-        sleep(1);
-    }
+void connect_to_esp32() {
+    
 }
 
 int main(int argc, char const *argv[]) {
@@ -280,10 +306,10 @@ int main(int argc, char const *argv[]) {
     } while (std::cin.get() != '\n');
     // Main menu
     clear_screen();
-    main_menu();
-    while (command != 999) {
+    list_main_menu_items();
+    while(command != 99) {
         std::cout << "> ";
-        if (!(std::cin >> command)) {
+        if(!(std::cin >> command)) {
             std::cin.clear();
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             clear_screen();
@@ -291,12 +317,12 @@ int main(int argc, char const *argv[]) {
             blankline();
             continue;
         }
-        switch (command) {
+        switch(command) {
             case 0: {
-                main_menu();
+                list_main_menu_items();
                 break;
             } case 1: {
-                hardware_info();
+                show_hardware_info();
                 break;
             } case 2: {
                 clear_screen();
@@ -315,7 +341,7 @@ int main(int argc, char const *argv[]) {
             } case 9: {
                 config();
                 break;
-            } case 999: {
+            } case 99: {
                 std::cout << "[OK] Exit" << std::endl;
                 return EXIT_SUCCESS;
                 break;

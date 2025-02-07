@@ -1,6 +1,5 @@
 #include <algorithm>
 #include <arpa/inet.h>
-#include <atomic>
 #include <chrono>
 #include <cmath>
 #include <ctime>
@@ -17,8 +16,6 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-
-std::atomic<bool> stop = false;
 
 // Check operating system
 #ifdef __linux__

@@ -116,39 +116,75 @@ void config() {
     } else {
         std::cout << "[ERROR] Unknown error occured" << std::endl;
     }
+    sleep(1);
+    // Check server/client setup file
+    if(!if_file_exists("Assets/server-config.conf")) {
+        std::cout << "[OK] Creating server/client conifguration file" << std::endl;
+        std::ofstream writeConfig("Assets/server-config.conf");
+        writeConfig.close();
+    } else if(if_file_exists("Assets/server-config.conf")) {
+        std::cout << "[OK] Server config file exists" << std::endl;
+    } else {
+        std::cout << "[ERROR] Unknown error occured" << std::endl;
+    }
     blankline();
     sleep(1);
-    // Hardware info
-    std::ofstream writeConfig("Assets/main-config.conf", std::ofstream::in | std::ofstream::out);
-    std::cout << "Hardware configuration:" << std::endl;
-    sleep(1);
-    // Hostname
-    std::cout << "Host:" << std::endl;
-    std::cout << "Hostname: " << hostname << std::endl;
-    writeConfig << "HOSTNAME= " << hostname << std::endl;
-    std::cout << "[OK] Host config saved" << std::endl;
-    sleep(1);
-    // Cpu
-    std::cout << "CPU:" << std::endl;
-    std::cout << "Detected CPU cores: " << numberOfCpus << std::endl;
-    writeConfig << "NUMBER_OF_CPUS= " << numberOfCpus << std::endl;
-    std::cout << "[OK] CPU config saved" << std::endl;
-    sleep(1);
-    //Memory
-    std::cout << "Memory:" << std::endl;
-    std::cout << "Detected memory size: " << memorySize << std::endl;
-    writeConfig << "MEMORY_SIZE= " << memorySize << std::endl;
-    std::cout << "[OK] Memory config saved" << std::endl;
-    blankline();
-    writeConfig.close();
-    sleep(1);
-    // Network onfig
-    std::ofstream writeNetworkConfig("Assets/main-network-config.conf", std::ofstream::in | std::ofstream::out);
-    std::cout << "Network configuration:" << std::endl;
-    //Local ip address
-    std::cout << "Local IP address:" << std::endl;
-    blankline();
-    sleep(1);
+
+    std::cout << "1. Hardware configuration" << std::endl;
+    std::cout << "2. Network/server configuration" << std::endl;
+    std::cout << "> ";
+    std::cin >> command;
+    if(command == 1) {
+        // Hardware config
+        std::ofstream writeConfig("Assets/main-config.conf", std::ofstream::in | std::ofstream::out);
+        std::cout << "Hardware configuration:" << std::endl;
+        sleep(1);
+        // Hostname
+        std::cout << "Host:" << std::endl;
+        std::cout << "Hostname: " << hostname << std::endl;
+        writeConfig << "HOSTNAME= " << hostname << std::endl;
+        std::cout << "[OK] Host config saved" << std::endl;
+        sleep(1);
+        // Cpu
+        std::cout << "CPU:" << std::endl;
+        std::cout << "Detected CPU cores: " << numberOfCpus << std::endl;
+        writeConfig << "NUMBER_OF_CPUS= " << numberOfCpus << std::endl;
+        std::cout << "[OK] CPU config saved" << std::endl;
+        sleep(1);
+        //Memory
+        std::cout << "Memory:" << std::endl;
+        std::cout << "Detected memory size: " << memorySize << std::endl;
+        writeConfig << "MEMORY_SIZE= " << memorySize << std::endl;
+        std::cout << "[OK] Memory config saved" << std::endl;
+        blankline();
+        writeConfig.close();
+        blankline();
+        sleep(1);
+    } else if(command == 2) {
+        // Network/server config
+        std::ofstream writeConfig("Assets/server-config.conf", std::ofstream::in | std::ofstream::out);
+        std::cout << "Network and server/client configuration:" << std::endl;
+        sleep(1);
+        // Server/client mode
+        std::cout << "1. Server" << std::endl;
+        std::cout << "2. Client" << std::endl;
+        std::cout << "> ";
+        std::cin >> command;
+        if(command == 1) {
+            std::cout << "Mode: Server" << std::endl;
+            writeConfig << "MODE= SERVER" << std::endl;
+            std::cout << "[OK] Server/client mode saved" << std::endl; 
+        } else if(command == 2) {
+            std::cout << "Mode: Client" << std::endl;
+            writeConfig << "MODE= CLIENT" << std::endl;
+            std::cout << "[OK] Server/client mode saved" << std::endl;
+        } else {
+            std::cout << "[ERROR] Unknown error occured" << std::endl;
+        }
+        sleep(1);
+        // Detect local IP address
+        std::cout << "Local IP address: " << "Work in progress" << std::endl;
+    }
 }
 
 void show_hardware_info() {
@@ -216,7 +252,7 @@ void selftest() {
         sleep(2);
     }
     if(!if_file_exists("Assets/main-network-config.conf")) {
-        std::cout << "[CRITICAL] No network configuration file" << std::endl;
+        std::cout << "[ERROR] No network configuration file" << std::endl;
         sleep(2);
     } else if(if_file_exists("Assets/main-network-config.conf")) {
         std::cout << "[OK] Network configuration file found" << std::endl;
@@ -277,6 +313,75 @@ void selftest() {
     blankline();
 }
 
+void socket_server() {
+    std::string modeFromConfig;
+    clear_screen();
+    std::ifstream readConfig ("Assets/main-config.conf");
+    if(readConfig.is_open()) {
+        std::string line;
+        while(getline(readConfig, line)) {
+            line.erase(std::remove_if(line.begin(), line.end(), isspace), line.end());
+            if(line[0] == '#' || line.empty()) {
+                continue;
+            }
+            auto delimiterPosition = line.find("=");
+            auto name = line.substr(0, delimiterPosition);
+            auto value = line.substr(delimiterPosition + 1);
+            if (name == "MODE") {
+                modeFromConfig = value;
+            }
+        }
+    } else {
+        std::cout << "[ERROR] Couldn't open configuration file" << std::endl;
+    }    
+    if(!if_file_exists("Assets/server-config.conf")) {
+        std::cout << "[ERROR] Server/client configuration not found" << std::endl;
+        std::cout << "[OK] Abort" << std::endl;
+        return;
+    }
+    std::cout << "[OK] Staring " << modeFromConfig << std::endl;
+    if(modeFromConfig == "SERVER") {
+        // Server mode
+        // creating socket
+        int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
+        // specifying the address
+        sockaddr_in serverAddress;
+        serverAddress.sin_family = AF_INET;
+        serverAddress.sin_port = htons(8080);
+        serverAddress.sin_addr.s_addr = INADDR_ANY;
+        // binding socket.
+        bind(serverSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress));
+        // listening to the assigned socket
+        listen(serverSocket, 5);
+        // accepting connection request
+        int clientSocket = accept(serverSocket, nullptr, nullptr);
+        // recieving data
+        char buffer[1024] = { 0 };
+        recv(clientSocket, buffer, sizeof(buffer), 0);
+        std::cout << "Message from client: " << buffer << std::endl;
+        // closing the socket.
+        close(serverSocket);
+    } else if(modeFromConfig == "CLIENT") {
+        // Client mode
+        // creating socket
+        int clientSocket = socket(AF_INET, SOCK_STREAM, 0);
+        // specifying address
+        sockaddr_in serverAddress;
+        serverAddress.sin_family = AF_INET;
+        serverAddress.sin_port = htons(8080);
+        serverAddress.sin_addr.s_addr = INADDR_ANY;
+        // sending connection request
+        connect(clientSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress));
+        // sending data
+        const char* message = "Hello, server!";
+        send(clientSocket, message, strlen(message), 0);
+        // closing socket
+        close(clientSocket);
+    } else {
+        std::cout << "[ERROR] Unknown socket mode" << std::endl;
+    }
+}
+
 void list_main_menu_items() {
     clear_screen();
     std::cout << "0. This menu" << std::endl;
@@ -288,18 +393,13 @@ void list_main_menu_items() {
     std::cout << "99. Exit" << std::endl;
 }
 
-void connect_to_esp32() {
-    
-}
-
 int main(int argc, char const *argv[]) {
     int command;
     // Main function
     clear_screen();
-    std::cout << "Panel" << std::endl;
-    blankline();
     // Selftest
     selftest();
+    std::cout << "OpenPanel 2024-2025" << std::endl;
     // Wait for user input to continue
     do {
         std::cout << "Press enter to continue..." << std::endl;
@@ -325,15 +425,10 @@ int main(int argc, char const *argv[]) {
                 show_hardware_info();
                 break;
             } case 2: {
-                clear_screen();
-                std::cout << "[WARNING] Main display is not available for now" << std::endl;
-                blankline();
+                // Main display
                 break;
             } case 3: {
-                //socket_server();
-                clear_screen();
-                std::cout << "[WARNING] Socket server is not available for now" << std::endl;
-                blankline();
+                socket_server();
                 break;
             } case 8: {
                 selftest();

@@ -313,7 +313,7 @@ void selftest() {
 void socket_server() {
     std::string modeFromConfig;
     clear_screen();
-    std::ifstream readConfig ("Assets/main-config.conf");
+    std::ifstream readConfig ("Assets/server-config.conf");
     if(readConfig.is_open()) {
         std::string line;
         while(getline(readConfig, line)) {

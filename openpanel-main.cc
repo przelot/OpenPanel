@@ -82,6 +82,7 @@ void config() {
     long pageSize = sysconf(_SC_PAGE_SIZE);
     int memorySize = numberOfPages*pageSize/pow(1024,2);
     std::cout << "Configuration" << std::endl;
+    sleep(1);
     // Check/create "Assets" directory
     if(!if_directory_exists("Assets")) {
         std::cout << "[OK] Creating assets directory" << std::endl;
@@ -91,7 +92,6 @@ void config() {
     } else {
         std::cout << "[ERROR] Unknown error occured" << std::endl;
     }
-    sleep(1);
     // Check config file
     if (!if_file_exists("Assets/main-config.conf")) {
         std::cout << "[OK] Creating configuration file" << std::endl;
@@ -102,21 +102,10 @@ void config() {
     } else {
         std::cout << "[ERROR] Unknown error occured" << std::endl;
     }
-    sleep(1);
     // Check network config file
-    if (!if_file_exists("Assets/main-network-config.conf")) {
-        std::cout << "[OK] Creating network configuration file" << std::endl;
-        std::ofstream writeNetworkConfig("Assets/main-network-config.conf");
-        writeNetworkConfig.close();
-    } else if(if_file_exists("Assets/main-network-config.conf")) {
-        std::cout << "[OK] Network configuration file exists" << std::endl;
-    } else {
-        std::cout << "[ERROR] Unknown error occured" << std::endl;
-    }
-    sleep(1);
     // Check server/client setup file
     if(!if_file_exists("Assets/server-config.conf")) {
-        std::cout << "[OK] Creating server/client conifguration file" << std::endl;
+        std::cout << "[OK] Creating socket conifguration file" << std::endl;
         std::ofstream writeConfig("Assets/server-config.conf");
         writeConfig.close();
     } else if(if_file_exists("Assets/server-config.conf")) {
@@ -126,31 +115,35 @@ void config() {
     }
     blankline();
     sleep(1);
-
+    std::cout << "0. Abort" << std::endl;
     std::cout << "1. Hardware configuration" << std::endl;
     std::cout << "2. Network/server configuration" << std::endl;
     std::cout << "> ";
     std::cin >> command;
-    if(command == 1) {
+    if(command == 0){
+        clear_screen();
+        std::cout << "[OK] Abort" << std::endl;
+        return;
+    } else if(command == 1) {
         // Hardware config
         std::ofstream writeConfig("Assets/main-config.conf", std::ofstream::in | std::ofstream::out);
         std::cout << "Hardware configuration:" << std::endl;
         sleep(1);
         // Hostname
         std::cout << "Host:" << std::endl;
-        std::cout << "Hostname: " << hostname << std::endl;
+        std::cout << "Hostname= " << hostname << std::endl;
         writeConfig << "HOSTNAME= " << hostname << std::endl;
         std::cout << "[OK] Host config saved" << std::endl;
         sleep(1);
         // Cpu
         std::cout << "CPU:" << std::endl;
-        std::cout << "Detected CPU cores: " << numberOfCpus << std::endl;
+        std::cout << "Detected CPU cores= " << numberOfCpus << std::endl;
         writeConfig << "NUMBER_OF_CPUS= " << numberOfCpus << std::endl;
         std::cout << "[OK] CPU config saved" << std::endl;
         sleep(1);
         //Memory
         std::cout << "Memory:" << std::endl;
-        std::cout << "Detected memory size: " << memorySize << std::endl;
+        std::cout << "Detected memory size= " << memorySize << std::endl;
         writeConfig << "MEMORY_SIZE= " << memorySize << std::endl;
         std::cout << "[OK] Memory config saved" << std::endl;
         blankline();
@@ -158,29 +151,32 @@ void config() {
         blankline();
         sleep(1);
     } else if(command == 2) {
-        // Network/server config
+        clear_screen();
+        //Network/server config
         std::ofstream writeConfig("Assets/server-config.conf", std::ofstream::in | std::ofstream::out);
         std::cout << "Network and server/client configuration:" << std::endl;
         sleep(1);
         // Server/client mode
+        std::cout << "Socket mode:" << std::endl;
         std::cout << "1. Server" << std::endl;
         std::cout << "2. Client" << std::endl;
         std::cout << "> ";
         std::cin >> command;
         if(command == 1) {
-            std::cout << "Mode: Server" << std::endl;
+            std::cout << "Mode= Server" << std::endl;
             writeConfig << "MODE= SERVER" << std::endl;
             std::cout << "[OK] Server/client mode saved" << std::endl; 
         } else if(command == 2) {
-            std::cout << "Mode: Client" << std::endl;
+            std::cout << "Mode= Client" << std::endl;
             writeConfig << "MODE= CLIENT" << std::endl;
             std::cout << "[OK] Server/client mode saved" << std::endl;
         } else {
+            clear_screen();
             std::cout << "[ERROR] Unknown error occured" << std::endl;
         }
         sleep(1);
         // Detect local IP address
-        std::cout << "Local IP address: " << "Work in progress" << std::endl;
+
     }
 }
 
@@ -222,43 +218,37 @@ void selftest() {
     long numberOfPages = sysconf(_SC_PHYS_PAGES);
     long pageSize = sysconf(_SC_PAGE_SIZE);
     int memorySize = numberOfPages*pageSize/pow(1024, 2);
+    // Network
+    std::string modeFromConfig;
     clear_screen();
     std::cout << "Selftest" << std::endl;
     sleep(1);
     //Check if "assets" directory exists
     if(!if_directory_exists("Assets")) {
-        std::cout << "[ERROR] No assets directory" << std::endl;
-        sleep(2);
+        std::cout << "[WARNING] No assets directory" << std::endl;
         return;
     } else if(if_directory_exists("Assets")) {
         std::cout << "[OK] Assets directory found" << std::endl;
-        sleep(1);
     } else {
         std::cout << "[ERROR] Unknown error occured" << std::endl;
-        sleep(2);
     }
     //Check if config exists
     if(!if_file_exists("Assets/main-config.conf")) {
-        std::cout << "[ERROR] No configuration file" << std::endl;
-        sleep(2);
+        std::cout << "[WARNING] No configuration file" << std::endl;
     } else if(if_file_exists("Assets/main-config.conf")) {
         std::cout << "[OK] Configuration file found" << std::endl;
-        sleep(1);
     } else {
         std::cout << "[ERROR] Unknown error occured" << std::endl;
-        sleep(2);
     }
-    if(!if_file_exists("Assets/main-network-config.conf")) {
-        std::cout << "[ERROR] No network configuration file" << std::endl;
-        sleep(2);
-    } else if(if_file_exists("Assets/main-network-config.conf")) {
-        std::cout << "[OK] Network configuration file found" << std::endl;
-        sleep(1);
+    if(!if_file_exists("Assets/server-config.conf")) {
+        std::cout << "[WARNING] No socket configuration file" << std::endl;
+    } else if(if_file_exists("Assets/server-config.conf")) {
+        std::cout << "[OK] Socket configuration file found" << std::endl;
     } else {
         std::cout << "[ERROR] Unknown error occured" << std::endl;
-        sleep(2);
     }
-    std::ifstream readConfig ("Assets/main-config.conf");
+    sleep(1);
+    std::ifstream readConfig("Assets/main-config.conf");
     if(readConfig.is_open()) {
         std::string line;
         while(getline(readConfig, line)) {
@@ -288,14 +278,12 @@ void selftest() {
         std::cout << "[WARNING] Hostname= " << hostname << " From config= " << hostnameFromConfig << std::endl;
         std::cout << "[WARNING] Configuration file may originate from another system" << std::endl;
     }
-    blankline();
     if(numberOfCpus == numberOfCpusFromConfig) {
         std::cout << "[OK] Number of cpus= " << numberOfCpus << " From config= " << numberOfCpusFromConfig << std::endl;
     } else {
         std::cout << "[WARNING] Number of cpus= " << numberOfCpus << " From config= " << numberOfCpusFromConfig << std::endl;
         std::cout << "[WARNING] Saved CPU cores number doesn't match the actual value" << std::endl;
     }
-    blankline();
     if(memorySize == memorySizeFromConfig) {
         std::cout << "[OK] Memory size= " << memorySizeFromConfig << " MB" << " From config= " << memorySizeFromConfig << " MB" << std::endl;
     } else {
@@ -306,6 +294,29 @@ void selftest() {
     blankline();
     sleep(1);
     std::cout << "Network configuration:" << std::endl;
+    std::ifstream readServerConfig("Assets/server-config.conf");
+    if(readServerConfig.is_open()) {
+        std::string line;
+        while(getline(readServerConfig, line)) {
+            line.erase(std::remove_if(line.begin(), line.end(), isspace), line.end());
+            if(line[0] == '#' || line.empty()) {
+                continue;
+            }
+            auto delimiterPosition = line.find("=");
+            auto name = line.substr(0, delimiterPosition);
+            auto value = line.substr(delimiterPosition + 1);
+            if (name == "MODE") {
+                modeFromConfig = value;
+            }
+        }
+    }
+    if(modeFromConfig == "SERVER" || modeFromConfig == "CLIENT") {
+        std::cout << "[OK] Socket mode: " << modeFromConfig << std::endl;
+    } else {
+        std::cout << "[WARNING] Socket mode: " << modeFromConfig << std::endl;
+        std::cout << "[WARNING] Invalid value for socket mode" << std::endl;
+    }
+    
     sleep(1);
     blankline();
 }
@@ -313,6 +324,11 @@ void selftest() {
 void socket_server() {
     std::string modeFromConfig;
     clear_screen();
+    if(!if_file_exists("Assets/server-config.conf")) {
+        std::cout << "[ERROR] Server/client configuration not found" << std::endl;
+        std::cout << "[OK] Abort" << std::endl;
+        return;
+    }
     std::ifstream readConfig ("Assets/server-config.conf");
     if(readConfig.is_open()) {
         std::string line;
@@ -330,50 +346,12 @@ void socket_server() {
         }
     } else {
         std::cout << "[ERROR] Couldn't open configuration file" << std::endl;
-    }    
-    if(!if_file_exists("Assets/server-config.conf")) {
-        std::cout << "[ERROR] Server/client configuration not found" << std::endl;
-        std::cout << "[OK] Abort" << std::endl;
-        return;
     }
-    std::cout << "[OK] Staring " << modeFromConfig << std::endl;
+    std::cout << "[OK] Starting " << modeFromConfig << std::endl;
     if(modeFromConfig == "SERVER") {
         // Server mode
-        // creating socket
-        int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
-        // specifying the address
-        sockaddr_in serverAddress;
-        serverAddress.sin_family = AF_INET;
-        serverAddress.sin_port = htons(8080);
-        serverAddress.sin_addr.s_addr = INADDR_ANY;
-        // binding socket.
-        bind(serverSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress));
-        // listening to the assigned socket
-        listen(serverSocket, 5);
-        // accepting connection request
-        int clientSocket = accept(serverSocket, nullptr, nullptr);
-        // recieving data
-        char buffer[1024] = { 0 };
-        recv(clientSocket, buffer, sizeof(buffer), 0);
-        std::cout << "Message from client: " << buffer << std::endl;
-        // closing the socket.
-        close(serverSocket);
     } else if(modeFromConfig == "CLIENT") {
         // Client mode
-        // creating socket
-        int clientSocket = socket(AF_INET, SOCK_STREAM, 0);
-        // specifying address
-        sockaddr_in serverAddress;
-        serverAddress.sin_family = AF_INET;
-        serverAddress.sin_port = htons(8080);
-        serverAddress.sin_addr.s_addr = INADDR_ANY;
-        // sending connection request
-        connect(clientSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress));
-        // sending data
-        const char* message = "Hello, server!";
-        send(clientSocket, message, strlen(message), 0);
-        // closing socket
-        close(clientSocket);
     } else {
         std::cout << "[ERROR] Unknown socket mode" << std::endl;
     }

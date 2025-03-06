@@ -1,7 +1,5 @@
 a.out
-Assets/main-config.conf
 Assets/hosts.txt
-test
-Assets/main-network-config.conf
+Assets/main-config.conf
 Assets/server-config.conf
 .gitignore

@@ -64,6 +64,37 @@ bool if_file_exists(const std::string& filename) {
     return std::filesystem::exists(filename);
 }
 
+std::string getLocalIp() {
+    const char* google_dns_server = "8.8.8.8";
+    int dns_port = 53;
+    struct sockaddr_in serv;
+    int sock = socket(AF_INET, SOCK_DGRAM, 0);
+    //Socket could not be created
+    if(sock < 0) {
+        std::cout << "Socket error" << std::endl;
+    }
+    memset(&serv, 0, sizeof(serv));
+    serv.sin_family = AF_INET;
+    serv.sin_addr.s_addr = inet_addr(google_dns_server);
+    serv.sin_port = htons(dns_port);
+    int err = connect(sock, (const struct sockaddr*)&serv, sizeof(serv));
+    if (err < 0) {
+        std::cout << "[ERROR] " << errno << strerror(errno) << std::endl;
+    }
+    struct sockaddr_in name;
+    socklen_t namelen = sizeof(name);
+    err = getsockname(sock, (struct sockaddr*)&name, &namelen);
+    char buffer[80];
+    const char* p = inet_ntop(AF_INET, &name.sin_addr, buffer, 80);
+    if(p != NULL) {
+        return buffer;
+    } else {
+        std::cout << "[Error] " << errno << strerror(errno) << std::endl;
+    }
+    close(sock);
+    return buffer;
+}
+
 // ! Only functions above allowed in functions bellow !
 
 void config() {
@@ -175,8 +206,11 @@ void config() {
             std::cout << "[ERROR] Unknown error occured" << std::endl;
         }
         sleep(1);
-        // Detect local IP address
-
+        blankline();
+        std::cout << "Local IP= " << getLocalIp() << std::endl;
+        writeConfig << "LOCALIP= " << getLocalIp() << std::endl;
+        std::cout << "[OK] Local IP saved" << std::endl;
+        blankline();
     }
 }
 
@@ -220,6 +254,8 @@ void selftest() {
     int memorySize = numberOfPages*pageSize/pow(1024, 2);
     // Network
     std::string modeFromConfig;
+    std::string localIp = getLocalIp();
+    std::string localIpFromConfig;
     clear_screen();
     std::cout << "Selftest" << std::endl;
     sleep(1);
@@ -273,21 +309,21 @@ void selftest() {
     blankline();
     std::cout << "Configuration:" << std::endl;
     if(hostname == hostnameFromConfig) {
-        std::cout << "[OK] Hostname= " << hostname << " From config= " << hostnameFromConfig << std::endl;
+        std::cout << "[OK] Hostname= " << hostname << std::endl;
     } else {
         std::cout << "[WARNING] Hostname= " << hostname << " From config= " << hostnameFromConfig << std::endl;
         std::cout << "[WARNING] Configuration file may originate from another system" << std::endl;
     }
     if(numberOfCpus == numberOfCpusFromConfig) {
-        std::cout << "[OK] Number of cpus= " << numberOfCpus << " From config= " << numberOfCpusFromConfig << std::endl;
+        std::cout << "[OK] Number of cpus= " << numberOfCpusFromConfig << std::endl;
     } else {
         std::cout << "[WARNING] Number of cpus= " << numberOfCpus << " From config= " << numberOfCpusFromConfig << std::endl;
         std::cout << "[WARNING] Saved CPU cores number doesn't match the actual value" << std::endl;
     }
     if(memorySize == memorySizeFromConfig) {
-        std::cout << "[OK] Memory size= " << memorySizeFromConfig << " MB" << " From config= " << memorySizeFromConfig << " MB" << std::endl;
+        std::cout << "[OK] Memory size= " << memorySizeFromConfig << " MB" << std::endl;
     } else {
-        std::cout << "[WARNING] Memory size= " << memorySizeFromConfig << " MB" << " From config= " << memorySizeFromConfig << " MB" << std::endl;
+        std::cout << "[WARNING] Memory size= " << memorySize << " MB" << " From config= " << memorySizeFromConfig << " MB" << std::endl;
         std::cout << "[WARNING] Saved memory size doesn't match the actual value" << std::endl;
     }
     readConfig.close();
@@ -307,16 +343,25 @@ void selftest() {
             auto value = line.substr(delimiterPosition + 1);
             if (name == "MODE") {
                 modeFromConfig = value;
+            } else if(name == "LOCALIP") {
+                localIpFromConfig = value;
             }
         }
+    } else {
+        std::cout << "[ERROR] Couldn't open network configuration file" << std::endl;
     }
     if(modeFromConfig == "SERVER" || modeFromConfig == "CLIENT") {
-        std::cout << "[OK] Socket mode: " << modeFromConfig << std::endl;
+        std::cout << "[OK] Socket mode= " << modeFromConfig << std::endl;
     } else {
-        std::cout << "[WARNING] Socket mode: " << modeFromConfig << std::endl;
+        std::cout << "[WARNING] Socket mode from config= " << modeFromConfig << std::endl;
         std::cout << "[WARNING] Invalid value for socket mode" << std::endl;
     }
-    
+    if(localIp == localIpFromConfig) {
+        std::cout << "[OK] Local IP= " << localIpFromConfig << std::endl;
+    } else {
+        std::cout << "[WARNING] Local IP= " << localIp << " From config= " << localIpFromConfig << std::endl;
+        std::cout << "[WARNING] Local IP changed" << std::endl;
+    }
     sleep(1);
     blankline();
 }
@@ -398,6 +443,7 @@ void list_main_menu_items() {
     std::cout << "8. Selftest" << std::endl;
     std::cout << "9. Config" << std::endl;
     std::cout << "99. Exit" << std::endl;
+    blankline();
 }
 
 int main(int argc, char const *argv[]) {

@@ -18,6 +18,7 @@
 #include <sys/stat.h>
 
 // Check operating system
+// Only linux kernel is supported
 #ifdef __linux__
     char clearScreenCommand[6] = "clear";
 #elif _WIN32 or _WIN64
@@ -28,28 +29,28 @@
     return 0;
 #endif
 
+// Clear the terminal
 void clear_screen() {
-    // Clear the terminal
     system(clearScreenCommand);
 }
 
+// Leave an empty line in terminal
 void blankline() {
-    // Leave an empty line
     std::cout << '\n';
 }
-
+// Wait for (seconds) ammount of time
 void sleep(int seconds) {
-    // Do nothing for X seconds
     std::this_thread::sleep_for(std::chrono::seconds(seconds));
 }
 
+// Get current system time
 void get_time() {
-    // Get current time
     auto time = std::chrono::system_clock::now();
     std::time_t time_now = std::chrono::system_clock::to_time_t(time);
     std::cout << "Current time: " << std::ctime(&time_now);
 }
 
+// Check if directory exists
 bool if_directory_exists(const char *path) {
     struct stat info;
     if(stat(path, &info)!=0) {
@@ -59,12 +60,14 @@ bool if_directory_exists(const char *path) {
     }
 }
 
+// Check if file exists
 bool if_file_exists(const std::string& filename) {
-    // Check if a file exists
     return std::filesystem::exists(filename);
 }
 
+// Get local ip of the machine
 std::string getLocalIp() {
+    // Connect to google DNS server
     const char* google_dns_server = "8.8.8.8";
     int dns_port = 53;
     struct sockaddr_in serv;
@@ -87,6 +90,7 @@ std::string getLocalIp() {
     char buffer[80];
     const char* p = inet_ntop(AF_INET, &name.sin_addr, buffer, 80);
     if(p != NULL) {
+        // Return local IP address
         return buffer;
     } else {
         std::cout << "[Error] " << errno << strerror(errno) << std::endl;
@@ -146,17 +150,19 @@ void config() {
     }
     blankline();
     sleep(1);
+    // Choose which settings you want to edit
     std::cout << "0. Abort" << std::endl;
     std::cout << "1. Hardware configuration" << std::endl;
     std::cout << "2. Network/server configuration" << std::endl;
     std::cout << "> ";
     std::cin >> command;
     if(command == 0){
+        // Abort 
         clear_screen();
         std::cout << "[OK] Abort" << std::endl;
         return;
     } else if(command == 1) {
-        // Hardware config
+        // Edit hardware config
         std::ofstream writeConfig("Assets/main-config.conf", std::ofstream::in | std::ofstream::out);
         std::cout << "Hardware configuration:" << std::endl;
         sleep(1);
@@ -183,7 +189,7 @@ void config() {
         sleep(1);
     } else if(command == 2) {
         clear_screen();
-        //Network/server config
+        // Edit network/server config
         std::ofstream writeConfig("Assets/server-config.conf", std::ofstream::in | std::ofstream::out);
         std::cout << "Network and server/client configuration:" << std::endl;
         sleep(1);
@@ -194,19 +200,23 @@ void config() {
         std::cout << "> ";
         std::cin >> command;
         if(command == 1) {
+            // Set mode to server
             std::cout << "Mode= Server" << std::endl;
             writeConfig << "MODE= SERVER" << std::endl;
             std::cout << "[OK] Server/client mode saved" << std::endl; 
         } else if(command == 2) {
+            // Set mode to client
             std::cout << "Mode= Client" << std::endl;
             writeConfig << "MODE= CLIENT" << std::endl;
             std::cout << "[OK] Server/client mode saved" << std::endl;
         } else {
+            // Unknown error
             clear_screen();
             std::cout << "[ERROR] Unknown error occured" << std::endl;
         }
         sleep(1);
         blankline();
+        // Set local IP address
         std::cout << "Local IP= " << getLocalIp() << std::endl;
         writeConfig << "LOCALIP= " << getLocalIp() << std::endl;
         std::cout << "[OK] Local IP saved" << std::endl;
@@ -284,6 +294,7 @@ void selftest() {
         std::cout << "[ERROR] Unknown error occured" << std::endl;
     }
     sleep(1);
+    // Read config
     std::ifstream readConfig("Assets/main-config.conf");
     if(readConfig.is_open()) {
         std::string line;
@@ -292,6 +303,7 @@ void selftest() {
             if(line[0] == '#' || line.empty()) {
                 continue;
             }
+            // Extract settings from file
             auto delimiterPosition = line.find("=");
             auto name = line.substr(0, delimiterPosition);
             auto value = line.substr(delimiterPosition + 1);
@@ -308,18 +320,21 @@ void selftest() {
     }
     blankline();
     std::cout << "Configuration:" << std::endl;
+    // Check if hostname is correct
     if(hostname == hostnameFromConfig) {
         std::cout << "[OK] Hostname= " << hostname << std::endl;
     } else {
         std::cout << "[WARNING] Hostname= " << hostname << " From config= " << hostnameFromConfig << std::endl;
         std::cout << "[WARNING] Configuration file may originate from another system" << std::endl;
     }
+    // Check if CPU is correct
     if(numberOfCpus == numberOfCpusFromConfig) {
         std::cout << "[OK] Number of cpus= " << numberOfCpusFromConfig << std::endl;
     } else {
         std::cout << "[WARNING] Number of cpus= " << numberOfCpus << " From config= " << numberOfCpusFromConfig << std::endl;
         std::cout << "[WARNING] Saved CPU cores number doesn't match the actual value" << std::endl;
     }
+    // Check if memory is correct
     if(memorySize == memorySizeFromConfig) {
         std::cout << "[OK] Memory size= " << memorySizeFromConfig << " MB" << std::endl;
     } else {
@@ -330,6 +345,7 @@ void selftest() {
     blankline();
     sleep(1);
     std::cout << "Network configuration:" << std::endl;
+    // Read config
     std::ifstream readServerConfig("Assets/server-config.conf");
     if(readServerConfig.is_open()) {
         std::string line;
@@ -338,6 +354,7 @@ void selftest() {
             if(line[0] == '#' || line.empty()) {
                 continue;
             }
+            // Extract settings from file
             auto delimiterPosition = line.find("=");
             auto name = line.substr(0, delimiterPosition);
             auto value = line.substr(delimiterPosition + 1);
@@ -350,12 +367,14 @@ void selftest() {
     } else {
         std::cout << "[ERROR] Couldn't open network configuration file" << std::endl;
     }
+    // Check mode
     if(modeFromConfig == "SERVER" || modeFromConfig == "CLIENT") {
         std::cout << "[OK] Socket mode= " << modeFromConfig << std::endl;
     } else {
         std::cout << "[WARNING] Socket mode from config= " << modeFromConfig << std::endl;
         std::cout << "[WARNING] Invalid value for socket mode" << std::endl;
     }
+    // Check if local ip is correct
     if(localIp == localIpFromConfig) {
         std::cout << "[OK] Local IP= " << localIpFromConfig << std::endl;
     } else {
@@ -369,11 +388,15 @@ void selftest() {
 void socket_server() {
     std::string modeFromConfig;
     clear_screen();
+    // Show IP for incoming connections
+    std::cout << "Local IP for incoming connections= " << getLocalIp() << std::endl;
+    // Check if server configuration exisits
     if(!if_file_exists("Assets/server-config.conf")) {
         std::cout << "[ERROR] Server/client configuration not found" << std::endl;
         std::cout << "[OK] Abort" << std::endl;
         return;
     }
+    // Read config
     std::ifstream readConfig ("Assets/server-config.conf");
     if(readConfig.is_open()) {
         std::string line;
@@ -382,6 +405,7 @@ void socket_server() {
             if(line[0] == '#' || line.empty()) {
                 continue;
             }
+            // Extract settings from file
             auto delimiterPosition = line.find("=");
             auto name = line.substr(0, delimiterPosition);
             auto value = line.substr(delimiterPosition + 1);
@@ -390,10 +414,12 @@ void socket_server() {
             }
         }
     } else {
+        // Unknown error
         std::cout << "[ERROR] Couldn't open configuration file" << std::endl;
     }
     std::cout << "[OK] Starting " << modeFromConfig << std::endl;
     if(modeFromConfig == "SERVER") {
+        // Server mode
         // creating socket
         int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
         // specifying the address
@@ -403,6 +429,7 @@ void socket_server() {
         serverAddress.sin_addr.s_addr = INADDR_ANY;
         // binding socket.
         bind(serverSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress));
+        std::cout << "[OK] Server started" << std::endl;
         // listening to the assigned socket
         listen(serverSocket, 5);
         // accepting connection request
@@ -415,6 +442,7 @@ void socket_server() {
         close(serverSocket);
         return;
     } else if(modeFromConfig == "CLIENT") {
+        // Client mode
         int clientSocket = socket(AF_INET, SOCK_STREAM, 0);
         // specifying address
         sockaddr_in serverAddress;
@@ -423,6 +451,7 @@ void socket_server() {
         serverAddress.sin_addr.s_addr = INADDR_ANY;
         // sending connection request
         connect(clientSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress));
+        std::cout << "[OK] Connected to server" << std::endl;
         // sending data
         const char* message = "[OK] Connection established";
         send(clientSocket, message, strlen(message), 0);
@@ -434,6 +463,7 @@ void socket_server() {
     }
 }
 
+// List menu positions
 void list_main_menu_items() {
     clear_screen();
     std::cout << "0. This menu" << std::endl;
@@ -446,11 +476,11 @@ void list_main_menu_items() {
     blankline();
 }
 
+// Main function
 int main(int argc, char const *argv[]) {
     int command;
-    // Main function
     clear_screen();
-    // Selftest
+    // Run selftest
     selftest();
     std::cout << "OpenPanel 2024-2025" << std::endl;
     // Wait for user input to continue
@@ -472,28 +502,35 @@ int main(int argc, char const *argv[]) {
         }
         switch(command) {
             case 0: {
+                // List menu items
                 list_main_menu_items();
                 break;
             } case 1: {
+                // Show harware information
                 show_hardware_info();
                 break;
             } case 2: {
-                // Main display
+                // Show main display
                 break;
             } case 3: {
+                // Run socket server
                 socket_server();
                 break;
             } case 8: {
+                // Run selftest
                 selftest();
                 break;
             } case 9: {
+                // Edit config
                 config();
                 break;
             } case 99: {
+                // Close the program
                 std::cout << "[OK] Exit" << std::endl;
                 return EXIT_SUCCESS;
                 break;
             } default: {
+                // Throw an error for invalid user input
                 clear_screen();
                 std::cout << "[WARNING] Invalid argument" << std::endl;
                 blankline();
